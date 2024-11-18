@@ -13,8 +13,8 @@ library(testthat)
 library(lubridate)
 
 # Read in the simulated data
-bike_share_data <- read_csv("data/simulated_bike_share_data.csv")
-bike_lane_data <- read_csv("data/simulated_bike_lane_data.csv")
+bike_share_data <- read_csv("data/00-simulated_data/simulated_bike_share_data.csv")
+bike_lane_data <- read_csv("data/00-simulated_data/simulated_bike_lane_data.csv")
 
 ######################## Test Bike Share Data Structure ######################
 test_that("Bike Share data has correct structure", {
