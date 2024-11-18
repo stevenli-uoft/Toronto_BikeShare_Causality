@@ -156,5 +156,7 @@ bike_lane_data %>%
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # Save simulated data
-write_csv(bike_share_data, "data/simulated_bike_share_data.csv")
-write_csv(bike_lane_data, "data/simulated_bike_lane_data.csv")
+write_csv(bike_share_data, 
+          "data/00-simulated_data/simulated_bike_share_data.csv")
+write_csv(bike_lane_data, 
+          "data/00-simulated_data/simulated_bike_lane_data.csv")
