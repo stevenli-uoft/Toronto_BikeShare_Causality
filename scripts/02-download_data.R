@@ -25,7 +25,7 @@ library(httr)
 # 1. Go to Open Data Toronto and search up "Bike Share Toronto Ridership Data"
 # 2. Download the bikeshare-ridership-2022 zip file
 # 3. Unzip the file, and unzip "Bike share ridership 2022-11.zip"
-# 4. Import "Bike share ridership 2022-11.csv" into raw_data/raw_bikeshare_data
+# 4. Import "Bike share ridership 2022-11.csv" into 01-raw_data/02-raw_bikeshare_data
 ###############################################################################
 
 
@@ -107,7 +107,7 @@ stations_df <- station_data$data$stations %>%
 
 #### Save data ####
 file_path <- file.path(bikestation_file_path, "bike_station_data.csv")
-write_csv(data, file_path)
+write_csv(stations_df, file_path)
 
 ##################### Cycling Network (Bike ways) data ########################
 # get package details
