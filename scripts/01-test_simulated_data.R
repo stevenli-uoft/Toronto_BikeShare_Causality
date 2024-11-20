@@ -4,7 +4,7 @@
 # Date: 17 November 2024
 # Contact: stevency.li@mail.utoronto.ca
 # Pre-requisites: 
-# - simulate_data.R must have been run first
+# - 00-simulate_data.R must have been run first
 # - The tidyverse, testthat, and lubridate packages must be installed
 
 #### Workspace setup ####
