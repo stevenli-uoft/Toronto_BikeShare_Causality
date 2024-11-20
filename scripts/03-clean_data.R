@@ -14,6 +14,8 @@ library(dplyr)
 library(readr)
 library(lubridate)
 library(fs)
+library(sf)
+library(units)
 
 ############################# Manage Directories #############################
 # Create directory to store cleaned data
@@ -29,10 +31,11 @@ dir_create(analysis_data_dir)
 
 ########################### Cleaning Bike Way Data ############################
 # Read in the raw data
-raw_data <- read_csv("data/01-raw_data/03-raw_bikeway_data/bikeway_data.csv")
+bike_lanes <- st_read(
+  "data/01-raw_data/03-raw_bikeway_data/bikeway_data.geojson")
 
 # Clean the data
-cleaned_data <- raw_data %>%
+bike_lanes <- bike_lanes %>%
   select(OBJECTID, INSTALLED, UPGRADED, INFRA_HIGHORDER, geometry) %>%
   drop_na(OBJECTID, INSTALLED, geometry) %>%
   filter(INSTALLED >= 2001 & INSTALLED <= 2023) %>%
@@ -49,8 +52,8 @@ cleaned_data <- raw_data %>%
   ) %>%
   drop_na(INFRA_HIGHORDER)  # Remove rows where INFRA_HIGHORDER doesn't match
 
-#### Save cleaned data ####
-write_csv(cleaned_data, "data/02-analysis_data/bikeway_data.csv")
+### Save cleaned data ####
+write_csv(bike_lanes, "data/02-analysis_data/bikeway_data.csv")
 
 
 # ################# Add Station ID info to 2017 Q3-Q4 rides  ####################
@@ -119,7 +122,7 @@ process_file <- function(file) {
       trip_id = as.integer(as.numeric(trip_id)),
       start_station_id = as.integer(as.numeric(start_station_id)),
       end_station_id = as.integer(as.numeric(end_station_id)),
-      
+
       # Convert start_date from chr to Date, trying different formats
       start_date = parse_date_time(start_date,
                                    orders = c("mdy HMS", "mdy HM", "mdy",
@@ -130,21 +133,76 @@ process_file <- function(file) {
     drop_na()
 }
 
-combined_data <- csv_files %>% map_dfr(process_file)
+combined_rides <- csv_files %>% map_dfr(process_file)
 
-###################### Join Bike Share and Station Data #######################
-# Left join lon and lat data of station info to combined_data
+### Saved combined_rides as CSV
+write_csv(combined_rides, "data/02-analysis_data/full_ridership.csv")
+
+############################ Filter bike rides #############################
+# Filter bike rides to include only those where the start and end station are 
+# within 100m of a designated bike lane. 
+
+# First, filter bike stations to keep only those within 100m to a bike lane
 bike_station <- read_csv(
   "data/01-raw_data/02-raw_bikestation_data/bike_station_data.csv")
 
-rides_with_loc <- combined_data %>%
-    left_join(bike_station, by=c("start_station_id" = "station_id")) %>%
-    rename(start_lat = lat, start_lon = lon) %>%
-    left_join(bike_station, by=c("end_station_id" = "station_id")) %>%
-    rename(end_lat = lat, end_lon = lon) %>%
-    select(trip_id, start_date, start_lat, start_lon, end_lat, end_lon) %>%
-    drop_na()
+# Convert bike stations to sf object
+bike_stations_sf <- bike_station %>%
+  st_as_sf(coords = c("lon", "lat"), 
+           crs = 4326)  # WGS84 coordinate system
 
-############################ Filter bike rides #############################
-# Filter bike rides to include only those start and end station are within 100m
-# of a designated bike lane
+# Ensure bike lanes is in the same CRS
+bike_lanes <- st_transform(bike_lanes, 4326)
+
+# Convert to a projected CRS for accurate distance measurements
+# Using UTM Zone 17N which is appropriate for Toronto
+bike_stations_sf <- st_transform(bike_stations_sf, 32617)
+bike_lanes <- st_transform(bike_lanes, 32617)
+
+# Calculate distance from each station to nearest bike lane
+stations_with_distance <- bike_stations_sf %>%
+  mutate(
+    dist_to_nearest_lane = st_distance(geometry, st_union(bike_lanes)),
+    dist_meters = as.numeric(dist_to_nearest_lane)
+  )
+
+# Filter stations within 100 meters of a bike lane
+stations_near_lanes <- stations_with_distance %>%
+  filter(dist_meters <= 100) %>%
+  st_transform(4326) # Convert back to original CRS
+
+# Convert back to regular dataframe
+final_stations <- stations_near_lanes %>%
+  st_drop_geometry() %>%
+  select(station_id, name, dist_meters)
+
+
+# Second, keep only bike rides with those narrowed down bike stations
+# Create a vector of valid station IDs for faster filtering
+valid_stations <- final_stations$station_id
+
+# Keep only rides where start and end stations are in our valid stations list
+filtered_rides <- combined_rides %>%
+  filter(
+    start_station_id %in% valid_stations,
+    end_station_id %in% valid_stations
+  )
+
+# Add station distance to bike lane to the filtered rides
+filtered_rides <- filtered_rides %>%
+  left_join(
+    final_stations %>% 
+      select(station_id, 
+             start_station_dist = dist_meters),
+    by = c("start_station_id" = "station_id")
+  ) %>%
+  left_join(
+    final_stations %>% 
+      select(station_id,
+             end_station_dist = dist_meters),
+    by = c("end_station_id" = "station_id")
+  )
+
+### Save filtered rides as CSV
+write_csv(filtered_rides, 
+          "data/02-analysis_data/filtered_ridership.csv")

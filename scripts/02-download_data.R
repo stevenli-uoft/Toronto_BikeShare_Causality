@@ -116,12 +116,13 @@ package <- show_package("cycling-network")
 # get all resources for this package
 resources <- list_package_resources("cycling-network")
 
-# identify datastore resources (CSV files)
-datastore_resources <- filter(resources, format == 'CSV')
+# identify datastore resources
+datastore_resources <- filter(resources, 
+                              name == 'cycling-network - 4326.geojson')
 
 # load datastore resource
 data <- filter(datastore_resources, row_number()==1) %>% get_resource()
 
 #### Save data ####
-file_path <- file.path(bikeway_file_path, "bikeway_data.csv")
-write_csv(data, file_path)
+file_path <- file.path(bikeway_file_path, "bikeway_data.geojson")
+st_write(data, file_path, driver = "GeoJSON")
