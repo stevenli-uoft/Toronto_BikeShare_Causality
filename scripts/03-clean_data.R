@@ -18,15 +18,15 @@ library(sf)
 library(units)
 
 ############################# Manage Directories #############################
-# Create directory to store cleaned data
-analysis_data_dir <- "data/02-analysis_data"
-
-# Check if the directory exists, if it does, delete it
-if (dir_exists(analysis_data_dir)) {
-  dir_delete(analysis_data_dir)  # Delete the folder and its contents
-}
-
-dir_create(analysis_data_dir)
+# # Create directory to store cleaned data
+# analysis_data_dir <- "data/02-analysis_data"
+# 
+# # Check if the directory exists, if it does, delete it
+# if (dir_exists(analysis_data_dir)) {
+#   dir_delete(analysis_data_dir)  # Delete the folder and its contents
+# }
+# 
+# dir_create(analysis_data_dir)
 
 
 ########################### Cleaning Bike Way Data ############################
@@ -130,6 +130,7 @@ process_file <- function(file) {
                                               "m/d/y"))
     ) %>%
     mutate(start_date = floor_date(start_date, unit = "month")) %>%
+    filter(year(start_date) <= 2023) %>%
     drop_na()
 }
 
@@ -190,8 +191,8 @@ valid_stations <- final_stations$station_id
 # Filter rides and add station information
 filtered_rides <- combined_rides %>%
   filter(
-    start_station_id %in% valid_stations,
-    end_station_id %in% valid_stations
+    start_station_id %in% valid_stations
+    # , end_station_id %in% valid_stations # If filtering for both stations near bikeway
   ) %>%
   # Join start station details
   left_join(
@@ -209,6 +210,7 @@ filtered_rides <- combined_rides %>%
              end_nearest_bikeway = nearest_bikeway_id),
     by = c("end_station_id" = "station_id")
   )
+  # filter(start_nearest_bikeway == end_nearest_bikeway) # If filtering for both stations near same bikeway
 
 ## Save filtered rides as CSV
 # write_csv(filtered_rides,
@@ -217,22 +219,23 @@ filtered_rides <- combined_rides %>%
 ################ Create Final Dataset for Diff-in-Diff model ##################
 # Step 1: Identify treatment and control bikeways
 bikeway_status <- bike_lanes %>%
+  select(-geometry) %>%
   mutate(
     # Determine treatment year (either UPGRADED or INSTALLED if no upgrade)
     treatment_year = case_when(UPGRADED > 0 ~ UPGRADED,
                                TRUE ~ INSTALLED),
     # Flag if bikeway was treated in our window of interest (2019-2021)
-    is_treated = treatment_year >= 2019 & treatment_year <= 2021,
+    is_treated = treatment_year >= 2017 & treatment_year <= 2023,
     # Flag control bikeways (not constructed/upgraded during study period)
-    is_control = (INSTALLED < 2017 & (UPGRADED == 0 | UPGRADED < 2017))
+    is_control = (INSTALLED < 2017 & UPGRADED < 2017)
   ) %>%
   select(bikeway_id = OBJECTID, treatment_year, is_treated, is_control)
 
 # Step 2: Get annual rides for each bikeway
-annual_rides <- filtered_rides %>%
+bikeway_annual_rides <- filtered_rides %>%
   mutate(calendar_year = year(start_date)) %>%
   group_by(start_nearest_bikeway, calendar_year) %>%
-  summarize(annual_rides = n(),.groups = 'drop')
+  summarize(bikeway_annual_rides = n(), .groups = 'drop')
 
 # Step 3: Create treatment dataset
 treatment_data <- bikeway_status %>%
@@ -245,7 +248,8 @@ treatment_data <- bikeway_status %>%
   mutate(
     calendar_year = treatment_year + relative_year,
     treatment = TRUE
-  )
+  ) %>%
+  drop_na(analysis_period)
 
 # Step 4: Create evenly distributed control dataset
 control_data <- bikeway_status %>%
@@ -271,11 +275,31 @@ control_data <- bikeway_status %>%
 
 # Step 5: Combine treatment and control bikeways, with annual rides data
 final_df <- bind_rows(treatment_data, control_data) %>%
-  left_join(annual_rides,
+  select(-geometry) %>%
+  left_join(bikeway_annual_rides,
             by = c("bikeway_id" = "start_nearest_bikeway", "calendar_year")
   ) %>%
-  mutate(annual_rides = replace_na(annual_rides, 0)) %>%
+  mutate(bikeway_annual_rides = replace_na(bikeway_annual_rides, 0)) %>%
   arrange(analysis_period, treatment, bikeway_id, calendar_year)
 
 ### Save final_df as CSV
 write_csv(final_df, "data/02-analysis_data/final_df.csv")
+
+####### NOTES:
+# 2017-2023 rides: 21.8m rides
+# Rides from 2017-2023 where start_station is near bikelane: 13.8m rides
+# After joining with control and treatment bikeways, there are ~8m rides
+#
+# This is because, we only gather 5 year periods of data for each bikeway, since
+# our analysis focused on 5 relative years, +-2 around treatment year. Each control
+# bikeway will have randomly selected pseudo-treatment years, with +- 2 years.
+# So because we only focus on 5 years per bikeway, it won't contain all bike rides
+# For example, we randomly selected bikewayID=4 as control bikeway, with 
+# pseudo-treatment year as 2020, so bikewayID=4 will have data from 2018-2022. 
+# So 2017 and 2023 rides for bikewayID=4 will be dropped from final_df.
+#
+#
+#
+# For filtered rides where start and end station is near bikelane: 1.01m rides
+# After joining with control and treatment bikeways, there are ~672k rides
+#
