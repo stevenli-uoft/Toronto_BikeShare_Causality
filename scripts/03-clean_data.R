@@ -60,10 +60,10 @@ write_csv(bike_lanes, "data/02-analysis_data/bikeway_data.csv")
 # # 2017 Q3 and Q4 are missing station ID data. Will join with bike station info to get ID's
 # bike_station <- read_csv(
 #   "data/01-raw_data/02-raw_bikestation_data/bike_station_data.csv")
-# 
+#
 # df2017 <- read_csv(
 #   "data/01-raw_data/01-raw_bikeshare_data/Bikeshare Ridership (2017 Q3).csv")
-# 
+#
 # # Left join twice by station name for starting and ending station ID
 # new_temp <- df2017 %>%
 #   left_join(bike_station, by=c("from_station_name" = "name")) %>%
@@ -73,13 +73,13 @@ write_csv(bike_lanes, "data/02-analysis_data/bikeway_data.csv")
 #   select(trip_id, trip_start_time, from_station_id, from_station_name,
 #          to_station_id, to_station_name) %>%
 #   drop_na() # filter rows with non-matching station IDs
-# 
+#
 # write_csv(new_temp, "data/01-raw_data/01-raw_bikeshare_data/Bikeshare Ridership (2017 Q3).csv")
-# 
+#
 # ### Do the same steps again fr Q4 2017
 # df2017 <- read_csv(
 #   "data/01-raw_data/01-raw_bikeshare_data/Bikeshare Ridership (2017 Q4).csv")
-# 
+#
 # # Left join twice by station name for starting and ending station ID
 # new_temp <- df2017 %>%
 #   left_join(bike_station, by=c("from_station_name" = "name")) %>%
@@ -89,7 +89,7 @@ write_csv(bike_lanes, "data/02-analysis_data/bikeway_data.csv")
 #   select(trip_id, trip_start_time, from_station_id, from_station_name,
 #          to_station_id, to_station_name) %>%
 #   drop_na() # filter rows with non-matching station IDs
-# 
+#
 # write_csv(new_temp, "data/01-raw_data/01-raw_bikeshare_data/Bikeshare Ridership (2017 Q4).csv")
 
 
@@ -135,12 +135,9 @@ process_file <- function(file) {
 
 combined_rides <- csv_files %>% map_dfr(process_file)
 
-### Saved combined_rides as CSV
-write_csv(combined_rides, "data/02-analysis_data/full_ridership.csv")
-
 ############################ Filter bike rides #############################
-# Filter bike rides to include only those where the start and end station are 
-# within 100m of a designated bike lane. 
+# Filter bike rides to include only those where the start and end station are
+# within 100m of a designated bike lane.
 
 # First, filter bike stations to keep only those within 100m to a bike lane
 bike_station <- read_csv(
@@ -148,61 +145,137 @@ bike_station <- read_csv(
 
 # Convert bike stations to sf object
 bike_stations_sf <- bike_station %>%
-  st_as_sf(coords = c("lon", "lat"), 
-           crs = 4326)  # WGS84 coordinate system
+  st_as_sf(coords = c("lon", "lat"), crs = 4326)  # WGS84 coordinate system
 
 # Ensure bike lanes is in the same CRS
 bike_lanes <- st_transform(bike_lanes, 4326)
 
 # Convert to a projected CRS for accurate distance measurements
-# Using UTM Zone 17N which is appropriate for Toronto
 bike_stations_sf <- st_transform(bike_stations_sf, 32617)
 bike_lanes <- st_transform(bike_lanes, 32617)
 
-# Calculate distance from each station to nearest bike lane
+# Function to find nearest feature and return its ID
+find_nearest_bikeway <- function(point_geometry, lines_sf) {
+  distances <- st_distance(point_geometry, lines_sf)
+  nearest_index <- which.min(distances)
+  return(list(
+    distance = min(distances),
+    bikeway_id = lines_sf$OBJECTID[nearest_index]  # Adjust field name if needed
+  ))
+}
+
+# Calculate distance and nearest bikeway for each station
 stations_with_distance <- bike_stations_sf %>%
+  rowwise() %>%
   mutate(
-    dist_to_nearest_lane = st_distance(geometry, st_union(bike_lanes)),
-    dist_meters = as.numeric(dist_to_nearest_lane)
-  )
+    nearest_info = list(find_nearest_bikeway(geometry, bike_lanes)),
+    dist_meters = as.numeric(nearest_info$distance),
+    nearest_bikeway_id = nearest_info$bikeway_id
+  ) %>%
+  ungroup()
 
 # Filter stations within 100 meters of a bike lane
 stations_near_lanes <- stations_with_distance %>%
   filter(dist_meters <= 100) %>%
-  st_transform(4326) # Convert back to original CRS
+  st_transform(4324) # Convert back to original CRS
 
 # Convert back to regular dataframe
 final_stations <- stations_near_lanes %>%
   st_drop_geometry() %>%
-  select(station_id, name, dist_meters)
+  select(station_id, name, dist_meters, nearest_bikeway_id)
 
-
-# Second, keep only bike rides with those narrowed down bike stations
-# Create a vector of valid station IDs for faster filtering
+# Create vector of valid station IDs for filtering
 valid_stations <- final_stations$station_id
 
-# Keep only rides where start and end stations are in our valid stations list
+# Filter rides and add station information
 filtered_rides <- combined_rides %>%
   filter(
     start_station_id %in% valid_stations,
     end_station_id %in% valid_stations
-  )
-
-# Add station distance to bike lane to the filtered rides
-filtered_rides <- filtered_rides %>%
+  ) %>%
+  # Join start station details
   left_join(
-    final_stations %>% 
-      select(station_id, 
-             start_station_dist = dist_meters),
+    final_stations %>%
+      select(station_id,
+             start_station_dist = dist_meters,
+             start_nearest_bikeway = nearest_bikeway_id),
     by = c("start_station_id" = "station_id")
   ) %>%
+  # Join end station details
   left_join(
-    final_stations %>% 
+    final_stations %>%
       select(station_id,
-             end_station_dist = dist_meters),
+             end_station_dist = dist_meters,
+             end_nearest_bikeway = nearest_bikeway_id),
     by = c("end_station_id" = "station_id")
   )
 
-### Save filtered rides as CSV
-write_csv(filtered_rides, 
-          "data/02-analysis_data/filtered_ridership.csv")
+## Save filtered rides as CSV
+# write_csv(filtered_rides,
+#           "data/02-analysis_data/filtered_ridership.csv")
+
+################ Create Final Dataset for Diff-in-Diff model ##################
+# Step 1: Identify treatment and control bikeways
+bikeway_status <- bike_lanes %>%
+  mutate(
+    # Determine treatment year (either UPGRADED or INSTALLED if no upgrade)
+    treatment_year = case_when(UPGRADED > 0 ~ UPGRADED,
+                               TRUE ~ INSTALLED),
+    # Flag if bikeway was treated in our window of interest (2019-2021)
+    is_treated = treatment_year >= 2019 & treatment_year <= 2021,
+    # Flag control bikeways (not constructed/upgraded during study period)
+    is_control = (INSTALLED < 2017 & (UPGRADED == 0 | UPGRADED < 2017))
+  ) %>%
+  select(bikeway_id = OBJECTID, treatment_year, is_treated, is_control)
+
+# Step 2: Get annual rides for each bikeway
+annual_rides <- filtered_rides %>%
+  mutate(calendar_year = year(start_date)) %>%
+  group_by(start_nearest_bikeway, calendar_year) %>%
+  summarize(annual_rides = n(),.groups = 'drop')
+
+# Step 3: Create treatment dataset
+treatment_data <- bikeway_status %>%
+  filter(is_treated) %>%
+  mutate(analysis_period = case_when(treatment_year == 2019 ~ "2017-2021",
+                                     treatment_year == 2020 ~ "2018-2022",
+                                     treatment_year == 2021 ~ "2019-2023")
+  ) %>%
+  crossing(relative_year = -2:2) %>%
+  mutate(
+    calendar_year = treatment_year + relative_year,
+    treatment = TRUE
+  )
+
+# Step 4: Create evenly distributed control dataset
+control_data <- bikeway_status %>%
+  filter(is_control) %>%
+  # Randomly assign control bikeways to analysis periods
+  mutate(
+    analysis_period = sample(c("2017-2021", "2018-2022", "2019-2023"), 
+                             n(), 
+                             replace = TRUE,
+                             prob = c(1/3, 1/3, 1/3)
+    )
+  ) %>%
+  crossing(relative_year = -2:2) %>%
+  mutate(
+    # Calculate calendar_year based on analysis period
+    calendar_year = case_when(
+      analysis_period == "2017-2021" ~ 2019 + relative_year,
+      analysis_period == "2018-2022" ~ 2020 + relative_year,
+      analysis_period == "2019-2023" ~ 2021 + relative_year
+    ),
+    treatment = FALSE
+  )
+
+# Step 5: Combine treatment and control bikeways, with annual rides data
+final_df <- bind_rows(treatment_data, control_data) %>%
+  left_join(annual_rides,
+            by = c("bikeway_id" = "start_nearest_bikeway", "calendar_year")
+  ) %>%
+  mutate(annual_rides = replace_na(annual_rides, 0)) %>%
+  arrange(analysis_period, treatment, bikeway_id, calendar_year)
+
+### Save final_df as CSV
+write_csv(final_df, "data/02-analysis_data/final_df.csv")
