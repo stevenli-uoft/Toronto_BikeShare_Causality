@@ -2,9 +2,8 @@
 title: "My title"
 subtitle: "My subtitle if needed"
 author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
+  - Steven Li
+thanks: "Code and data are available at: [https://github.com/stevenli-uoft/Toronto_BikeShare_Causality](https://github.com/stevenli-uoft/Toronto_BikeShare_Causality)."
 date: today
 date-format: long
 abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
@@ -19,241 +18,233 @@ bibliography: references.bib
 #| message: false
 
 library(tidyverse)
-library(palmerpenguins)
 ```
-
-
+ 
+\newpage
 # Introduction
-
-Overview paragraph
+Context and motivation paragraph
 
 Estimand paragraph
 
 Results paragraph
 
-Why it matters paragraph
+Why it's important
 
-Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
-
-
-
-
-
+Paper structure
 
 # Data {#sec-data}
-
 ## Overview
-
-We use the statistical programming language R [@citeR].... Our data [@shelter].... Following @tellingstories, we consider...
-
-Overview text
+Tools, data sources, and context
 
 ## Measurement
-	
-Some paragraphs about how we go from a phenomena in the world to an entry in the dataset.
+- Detailed explanation of how cycling infrastructure changes are measured and recorded
+- Discussion of how ridership is measured through the Bike Share system
+- Talk about how the data goes from people to paper/data
 
-## Outcome variables
+## Data Cleaning
+Overview of data cleaning steps to reach final dataframe. Mention that a much more details data processing methodology is outlined in appendix.
 
-Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
+**discuss using relative year for pre/treatment/post periods**
 
+## Outcome Variables
+- Monthly ridership counts
+- Seasonally adjusted ridership
 
+\vspace*{\fill}
+\begin{center}
+**Line graph of ridership over relative months, both raw and adjusted riderhsip**
+\end{center}
+\vspace*{\fill}
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+## Treatment Variables
+- Treatment: Infrastructure changes (with timing)
+- Include visualization of treatment and control groups. 
 
-```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
-#| echo: false
+\vspace*{\fill}
+\begin{center}
+**Bar graph of upgrades and installation over time**
+\end{center}
+\vspace*{\fill}
 
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
-```
-
-Talk more about it.
-
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
-
-```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
-#| echo: false
-#| warning: false
-#| message: false
-
-analysis_data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
-
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
-```
-
-Talk way more about it. 
-
-## Predictor variables
-
-Add graphs, tables and text.
-
-Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
-
-
-
-
-
-
-
+## Summary Statistics
+\vspace*{\fill}
+\begin{center}
+**Table of treatment vs control group statistics, pre/post treatment**
+\end{center}
+\vspace*{\fill}
 
 # Model
+## Model justification
+Why DiD model
 
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
+## Assumptions
+Assumptions on data and definitons
 
 ## Model set-up
+Mathematical notation of model
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
+## Robustness Checks
+### Parallel Trends Test
+- Methodology and justification
 
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
+### Placebo Tests
+- Methodology and justification
 
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
-
-
-### Model justification
-
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
-
+### Heterogeneity Analysis
+- Define subgroups (Types of bikeways)
+- Methodology and justification
 
 # Results
+## Parallel Trend Analysis
+\vspace*{\fill}
+\begin{center}
+**Visualization of parallel trend test**
+\end{center}
+\vspace*{\fill}
 
-Our results are summarized in @tbl-modelresults.
+- Statistics and discussion
 
-```{r}
-#| echo: false
-#| eval: true
-#| warning: false
-#| message: false
+## Difference-in-Difference Model Estimates
+\vspace*{\fill}
+\begin{center}
+**Visualization of DiD model**
+\end{center}
+\vspace*{\fill}
 
-library(rstanarm)
+- Primary results
+- Discussion of statistical results
 
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
-```
+## Robustness Checks
+### Placebo Test Results
+- Present results and discuss implications
 
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
-
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
-
-
-
+### Heterogenous Effects
+- Compare effects across bikeway types
+- Include figures or tables
 
 # Discussion
+## Model Results Interpretation
 
-## First discussion point {#sec-first-point}
+## Policy Implications and Recommendations
 
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
-
-## Second discussion point
-
-Please don't use these as sub-heading labels - change them to be what your point actually is.
-
-## Third discussion point
-
-## Weaknesses and next steps
-
-Weaknesses and next steps should also be included.
+## Limitations and Future Research
 
 \newpage
 
 \appendix
 
-# Appendix {-}
+# Appendix {.unnumbered}
+# Idealized Survey Methodology
+## Survey Objectives
+Following Stantcheva's [-@Stantcheva2023] framework, we recognize that surveys are not merely for data colletion, but rather "creating the process that will generate the data." The goal of our idealized survey is to measure otherwise "invisible factors" regarding cycling infrastructures influence on bike share usage, specifically:
+
+  > - Causal relationship between infrastructure changes and ridership
+  > - Mental processes behind route selection with/without bike lanes
+  > - Perception of safety and convenience
+  > - Counterfactual behavior (would people use bike share if infrastructure improves)
+
+Having this idealized survey would help us directly answer our research question by creating controlled variation in our sampling strategy, comparing treatment areas with new or upgraded bike lanes against control areas without changes. This design allows us to measure both first-stage effects of infrastructure changes on perceptions and intended behavior, and second-stage effects on actual ridership through follow-up surveys, while controlling for demographic and geographic factors. Through carefully designed questions about safety perceptions, route preferences, and time-value tradeoffs, we can identify the specific mechanisms through which infrastructure improvements affect ridership patterns. Additionally, our sampling of different user types enables analysis of heterogeneous effects across current, former, and potential users in various neighborhoods, providing a comprehensive understanding of how infrastructure changes influence Bike Share adoption.
+
+## Implementation Strategy
+### Sample Size and Target Audience
+Our survey will be targeted towards: current and former (In-active user for over 6 months) Bike Share members, and non-bike share users living within 200 meters of Bike Share Station. Our target sample size will be 3,000 respondents:
+
+- 1,000 treatment area residents
+- 1,000 control area residents
+- 1,000 current Bike Share users
+
+### Recruitment Channels
+- **Digital Targeting:** Instagram/Facebook/X (Twitter) ads geo-targeting users within 200 meters to a bike share station. This method will target our entire audience group, and allow us to differentiate between treatment and control groups.
+- **Direct Outreach**: Email distribution or SMS notifications to current and former bike share users living within 200 meters of a Bike Share station, identified through Bike Share Toronto's database.
+- **Incentive Structure**: \$20 Bike Share gift card for completed surveys, with a bonus \$10 for follow-up survey completion
+
+### Budget Allocation
+Our allocation of a \$100,000 budget, will be:
+
+- $15,000 to digital targeting costs of placing ads on social media platforms.
+- $10,000 to Bike Share Toronto to distribute Emails and SMS notifications, taking advantage of their existing digital platform and data.
+- $75,000 to incentives, ensuring that all respondents receive their \$20 Bike Share Toronto gift card, and the bonus \$10 gift card.
+
+## Survey Design Elements
+**Opening Module**
+
+"Welcome! Thank you for participating in our survey about bike lane infrastructure and its effects on Bike Share ridership in Toronto. This survey is being conducted as part of research to better understand how infrastructure upgrades influence biking habits.
+
+Your responses will help shape future urban transportation decisions. The survey will take approximately 5 minutes to complete. As a thank-you for your time, you will receive a \$20 Bike Share Toronto gift card, with an additional \$10 gift card for completing a follow-up survey in 3 months.
+
+Your participation is completely voluntary, and all responses will remain confidential and anonymous.
+
+For any questions or concerns, contact us at: stevency.li@mail.utoronto.ca"
+
+**Key Questions**
+
+1. **Time-Based Preference**: "Consider two possible routes for a 15-minute trip. Route A: 15 minutes using regular streets with cars. Route B: 20-minutes using protected bike lanes. Which would you choose for a Bike Share trip?
+
+  > - Route A (shorter, regular streets)
+  > - Not sure
+  > - Route B (longer, protected lanes)"
+
+2. **Route Selection Experiment** (Map showing City of Toronto's neighbourhoods): "Which areas of Toronto do you typically commute through? Please type in the neighbourhood(s) in the text box below."
+
+3. **Visual Choice Experiment** (Show side-by-side images of the same bike lane before and after upgrades) : "If you needed to travel along this route, which version would make you more likely to use Bike Share?
+
+  > - Much more likely with the upgraded lane
+  > - Somewhat more likely with the upgraded lane
+  > - No difference
+  > - Less likely with the upgraded lane"
+
+4. **Behavioral Scenarios**: "Imagine a Bike Share station gets installed near your workplace, and the city adds protected bike lanes on your route to work. What would you do?
+
+  > - Definitely try biking to work
+  > - Might try biking occasionally
+  > - Probably wouldn't change my commuting method
+  > - Definitely wouldn't change my commuting method"
+  
+**Confirmation Message**
+
+"Thank you for your time and participation..."Thank you for completing this survey! Your insights will help us better understand how bike infrastructure influences transportation choices in Toronto.
+
+Your \$20 Bike Share Toronto gift card will be sent to your provided contact information within 5 business days. In approximately 3 months, we will send you an invitation for a brief follow-up survey, where you can earn an additional \$10 gift card.
+
+For any questions about the survey or your gift card, please contact: stevency.li@mail.utoronto.ca"
+
+**Idealized Survey — Opening Module can be found at**: [First Survey Link](https://docs.google.com/forms/d/e/1FAIpQLSei00OAr1SRCIorOniT8Wf9GTmZLOdtRSjEFobWrUVxDddRYw/viewform)
 
 
-# Additional data details
+**Follow-up Module**
 
-# Model details {#sec-model-details}
+As recommended by Stantcheva [-@Stantcheva2023] for testing persistence of effects, we will implement a comprehensive three-month follow-up survey. The key objective is to assess whether the stated preferences and intentions from the initial survey translate into actual behavioral changes, while also measuring any infrastructure-induced effects on ridership patterns. To maximize response rates, we will offer an additional $10 gift card incentive and keep the follow-up survey brief (under 3 minutes).
 
-## Posterior predictive check
+The follow-up survey will focus on concrete behavioral measures rather than attitudes, asking respondents about their actual Bike Share usage patterns over the past three months, including:
 
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
+- Frequency of Bike Share trips
+- Use of routes with new or upgraded infrastructure
+- Reasons for any deviations from stated intentions
 
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
+To minimize attrition bias, which Stantcheva [-@Stantcheva2023] identifies as a key concern in follow-up surveys, we will:
 
-```{r}
-#| eval: true
-#| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
+- Send reminder notifications through multiple channels (email, SMS, app notifications)
+- Track and analyze patterns of non-response
+- Apply appropriate statistical corrections for differential attrition
 
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
+This approach allows us to not only validate initial survey responses but also capture how seasonal changes and growing familiarity with new infrastructure might influence ridership patterns. The combination of initial intentions and realized behaviors provides a more robust foundation for establishing the causal relationship between infrastructure improvements and Bike Share adoption.
 
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
-```
+**Idealized Survey — Follow-up Module can be found at**: [Follow-up Survey Link](https://docs.google.com/forms/d/e/1FAIpQLSeFFbTQ2TPpQ96Nw2xq_aPBEO_AE3N3X6o5bG2JSYYVLZyYXg/viewform)
 
-## Diagnostics
+## Bias Mitigation Strategies
+We implement several strategies to mitigate potential biases in our survey design. To reduce social desirability bias, we emphasize complete anonymity of responses, employ indirect questioning techniques, and carefully avoid leading questions about environmental benefits that might prompt respondents to present themselves as more environmentally conscious. Survey fatigue is addressed by keeping the total length to 5 minutes, and varying question formats to maintain engagement. Selection bias poses a particular challenge in transportation surveys, so we collect detailed non-response data, and carefully document and analyze attrition patterns. This approach to bias mitigation helps ensure our results accurately reflect the relationship between cycling infrastructure and Bike Share usage, rather than capturing respondent's desires to appear environmentally conscious or systematic differences between those who complete versus abandon the survey.
 
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
+## Tradeoffs and Limitations
+Our survey methodology faces several important limitations that could affect the validity of our results. First, self-selection and non-response bias may skew our sample toward respondents who are already interested in cycling or have strong opinions about infrastructure, while our incentive structure might attract particular demographic groups, potentially missing key segments of the population. Our reliance on hypothetical scenarios and stated preferences introduces additional uncertainty, as actual behavior may differ significantly from reported intentions, especially regarding route selection and infrastructure usage. Despite careful design to minimize social desirability bias, respondents may still feel pressure to express support for sustainable transportation initiatives or understate safety concerns. Furthermore, temporal limitations of our three-month follow-up period may inadequately capture seasonal variations in cycling behavior and long-term adaptation to infrastructure changes, while the results may not generalize well to other urban contexts or represent the full diversity of potential users. These limitations suggest that while our survey can provide valuable insights into the relationship between infrastructure and ridership, findings should be interpreted alongside other data sources and methodologies.
 
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
+# Additional Tables & Figures
 
-```{r}
-#| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
+# Data Processing
+## Spatial Filtering
+## Treatment and Control Group Construction
 
-plot(first_model, "trace")
-
-plot(first_model, "rhat")
-```
-
-
+# Model Details and Diagnostics
 
 \newpage
 
-
 # References
-
-
