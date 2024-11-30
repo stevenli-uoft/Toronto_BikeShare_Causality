@@ -16,6 +16,7 @@ library(lubridate)
 library(fs)
 library(sf)
 library(units)
+library(arrow)
 
 ############################# Manage Directories #############################
 # # Create directory to store cleaned data
@@ -52,9 +53,8 @@ bike_lanes <- bike_lanes %>%
   ) %>%
   drop_na(INFRA_HIGHORDER)  # Remove rows where INFRA_HIGHORDER doesn't match
 
-### Save cleaned data ####
-write_csv(bike_lanes, "data/02-analysis_data/bikeway_data.csv")
-
+### We need geometry data for further data processing. So geometry column will
+### be dropped at the end, so bike_lanes can be saved as parquet file.
 
 # ################# Add Station ID info to 2017 Q3-Q4 rides  ####################
 # # 2017 Q3 and Q4 are missing station ID data. Will join with bike station info to get ID's
@@ -219,19 +219,26 @@ filtered_rides <- combined_rides %>%
 ################ Create Final Dataset for Diff-in-Diff model ##################
 # Step 1: Identify treatment and control bikeways
 bikeway_status <- bike_lanes %>%
-  select(-geometry) %>%
   mutate(
     # Determine treatment year (either UPGRADED or INSTALLED if no upgrade)
-    upgrade_installed_year = case_when(
-      UPGRADED > 0 ~ UPGRADED,
-      TRUE ~ INSTALLED
-    ),
+    upgrade_installed_year = case_when(UPGRADED > 0 ~ UPGRADED
+                                       , TRUE ~ INSTALLED),
+    
     # Flag if bikeway was treated in our window of interest (2019-2021)
     is_treated = upgrade_installed_year >= 2019 & upgrade_installed_year <= 2021,
+    
     # Flag control bikeways (not constructed/upgraded during study period)
-    is_control = (INSTALLED < 2017 & (is.na(UPGRADED) | UPGRADED < 2017))
+    is_control = (INSTALLED < 2017 & (is.na(UPGRADED) | UPGRADED < 2017)),
+    
+    # Label treatment type as upgraded or newly-installed bike lanes
+    treatment_type = case_when(
+      UPGRADED >= 2019 & UPGRADED <= 2021 ~ 'Upgraded'
+      , INSTALLED >= 2019 & INSTALLED <= 2021 ~ 'Newly-Installed'
+      , TRUE ~ 'No Treatment')
   ) %>%
-  select(bikeway_id = OBJECTID, upgrade_installed_year, is_treated, is_control)
+  select(bikeway_id = OBJECTID, upgrade_installed_year, is_treated, is_control,
+         INFRA_HIGHORDER, treatment_type) %>%
+  st_drop_geometry()
 
 # Step 2: Get monthly rides for each bikeway and adjust for seasonality
 # First get raw monthly rides
@@ -341,6 +348,7 @@ treatment_data <- bikeway_status %>%
   )
 
 # Step 4: Create control dataset with monthly periods
+set.seed(778) # equally distributing control bikeways to 3 periods
 control_data <- bikeway_status %>%
   filter(is_control) %>%
   # Randomly assign control bikeways to analysis periods
@@ -419,15 +427,25 @@ final_df <- bind_rows(
     bikeway_monthly_rides,
     by = c("bikeway_id" = "start_nearest_bikeway", "year_month")
   ) %>%
+  # Add left join with original bikeway_status to ensure these columns are preserved
+  left_join(
+    bikeway_status %>% 
+      select(bikeway_id, INFRA_HIGHORDER, treatment_type),
+    by = "bikeway_id"
+  ) %>%
   mutate(
     bikeway_monthly_rides = replace_na(bikeway_monthly_rides, 0),
     bikeway_monthly_rides_adjusted = replace_na(bikeway_monthly_rides_adjusted, 0)
   ) %>%
   arrange(analysis_period, treatment, bikeway_id, year_month)
 
-# Save final dataset
-write_csv(final_df, "data/02-analysis_data/final_df.csv")
 
+########################### Save final dataset ##############################
+write_parquet(final_df, "data/02-analysis_data/final_df.parquet")
+
+############### Save bike lanes data, drop geometry column first ############
+bike_lanes <- bike_lanes %>% st_drop_geometry()
+write_parquet(bike_lanes, "data/02-analysis_data/bikeway_data.parquet")
 
 ####### NOTES:
 # 2017-2023 rides: 21.8m rides
@@ -451,7 +469,7 @@ write_csv(final_df, "data/02-analysis_data/final_df.csv")
 
 # final_df %>%
 #   group_by(relative_month) %>%
-#   summarise(total_rides = sum(bikeway_monthly_rides_adjusted)) %>%
+#   summarise(total_rides = sum(bikeway_monthly_rides)) %>%
 #   ggplot(aes(x = relative_month, y = total_rides)) +
 #   geom_line() +
 #   geom_point(alpha = 0.5) +
