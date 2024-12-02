@@ -32,11 +32,6 @@ library(httr)
 ############################# Manage Directories #############################
 raw_data_dir <- "data/01-raw_data"
 
-# Check if the directory exists, if it does, delete it
-if (dir_exists(raw_data_dir)) {
-  dir_delete(raw_data_dir)  # Delete the folder and its contents
-}
-
 # Recreate the directories after deletion
 bikeshare_file_path <- file.path(raw_data_dir, "01-raw_bikeshare_data")
 dir_create(bikeshare_file_path)
@@ -80,49 +75,49 @@ for(i in 1:nrow(datastore_resources)) {
   }
 }
 
-########################## Bike Share Stations data ##########################
-# get package details
-package <- show_package("2b44db0d-eea9-442d-b038-79335368ad5a")
-
-# get all resources for this package
-resources <- list_package_resources("2b44db0d-eea9-442d-b038-79335368ad5a")
-
-# filter relevant file needed (bike-share-json)
-datastore_resources <- filter(resources, name == 'bike-share-json')
-
-# Get metadata (contains relevant URL to json)
-gbfs_data <- get_resource(datastore_resources$id)
-
-# Extract the station_information URL
-station_url <- gbfs_data$data$en$feeds$url[3]  # Third URL is station_information
-
-# Use httr to get the station data
-response <- GET(station_url)
-station_data <- fromJSON(rawToChar(response$content))
-
-# Convert to a tibble
-stations_df <- station_data$data$stations %>%
-  as_tibble() %>%
-  select(station_id, name, lat, lon)
-
-#### Save data ####
-file_path <- file.path(bikestation_file_path, "bike_station_data.csv")
-write_csv(stations_df, file_path)
-
-##################### Cycling Network (Bike ways) data ########################
-# get package details
-package <- show_package("cycling-network")
-
-# get all resources for this package
-resources <- list_package_resources("cycling-network")
-
-# identify datastore resources
-datastore_resources <- filter(resources, 
-                              name == 'cycling-network - 4326.geojson')
-
-# load datastore resource
-data <- filter(datastore_resources, row_number()==1) %>% get_resource()
-
-#### Save data ####
-file_path <- file.path(bikeway_file_path, "bikeway_data.geojson")
-st_write(data, file_path, driver = "GeoJSON")
+# ########################## Bike Share Stations data ##########################
+# # get package details
+# package <- show_package("2b44db0d-eea9-442d-b038-79335368ad5a")
+# 
+# # get all resources for this package
+# resources <- list_package_resources("2b44db0d-eea9-442d-b038-79335368ad5a")
+# 
+# # filter relevant file needed (bike-share-json)
+# datastore_resources <- filter(resources, name == 'bike-share-json')
+# 
+# # Get metadata (contains relevant URL to json)
+# gbfs_data <- get_resource(datastore_resources$id)
+# 
+# # Extract the station_information URL
+# station_url <- gbfs_data$data$en$feeds$url[3]  # Third URL is station_information
+# 
+# # Use httr to get the station data
+# response <- GET(station_url)
+# station_data <- fromJSON(rawToChar(response$content))
+# 
+# # Convert to a tibble
+# stations_df <- station_data$data$stations %>%
+#   as_tibble() %>%
+#   select(station_id, name, lat, lon)
+# 
+# #### Save data ####
+# file_path <- file.path(bikestation_file_path, "bike_station_data.csv")
+# write_csv(stations_df, file_path)
+# 
+# ##################### Cycling Network (Bike ways) data ########################
+# # get package details
+# package <- show_package("cycling-network")
+# 
+# # get all resources for this package
+# resources <- list_package_resources("cycling-network")
+# 
+# # identify datastore resources
+# datastore_resources <- filter(resources, 
+#                               name == 'cycling-network - 4326.geojson')
+# 
+# # load datastore resource
+# data <- filter(datastore_resources, row_number()==1) %>% get_resource()
+# 
+# #### Save data ####
+# file_path <- file.path(bikeway_file_path, "bikeway_data.geojson")
+# st_write(data, file_path, driver = "GeoJSON")
