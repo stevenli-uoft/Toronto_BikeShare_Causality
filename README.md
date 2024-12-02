@@ -10,13 +10,13 @@ The repo is structured as follows:
 - `data/00-simulated_data` contains the simulated data used for testing the model and validating analysis methods
 - `data/01-raw_data`
   - `data/01-raw_data/01-raw_bikeshare_data` due to the raw Bake Share Ridership data being too large to upload, follow the "Reproducing Graphs and Tables" instruction below to obtain the data and reproduce the paper
-  -   `data/01-raw_data/02-raw_bikestation_data` contains the raw Bike Share stations data obtained from Open Data Toronto [Link]([https://open.toronto.ca/dataset/cycling-network/](https://open.toronto.ca/dataset/bike-share-toronto/)
-  -   `data/01-raw_data/03-raw_bikeway_data`  contains the raw bikeway data obtained from Open Data Toronto [Link](https://open.toronto.ca/dataset/cycling-network/)
--   `data/02-analysis_data` contains the cleaned and processed dataset to be used for running the DiD model, and further analysis.
--   `models` contains fitted models including the main difference-in-differences specifications and robustness checks
--   `other` contains details about LLM chat interactions, sketches of planned visualizations and analyses, and the datasheet documenting our dataset characteristics
--   `paper` contains the files used to generate the paper, including the Quarto document and reference bibliography file, as well as the PDF of the paper
--   `scripts` contains the R scripts used to simulate, download, clean, and test the data, as well as create the DiD models:
+  - `data/01-raw_data/02-raw_bikestation_data` contains the raw Bike Share stations data obtained from Open Data Toronto [Link]([https://open.toronto.ca/dataset/cycling-network/](https://open.toronto.ca/dataset/bike-share-toronto/)
+  - `data/01-raw_data/03-raw_bikeway_data`  contains the raw bikeway data obtained from Open Data Toronto [Link](https://open.toronto.ca/dataset/cycling-network/)
+- `data/02-analysis_data` contains the cleaned and processed dataset to be used for running the DiD model, and further analysis.
+- `models` contains fitted models including the main difference-in-differences specifications and robustness checks
+- `other` contains details about LLM chat interactions, sketches of planned visualizations and analyses, and the datasheet documenting our dataset characteristics
+- `paper` contains the files used to generate the paper, including the Quarto document and reference bibliography file, as well as the PDF of the paper
+- `scripts` contains the R scripts used to simulate, download, clean, and test the data, as well as create the DiD models:
 
 ## Reproducing the Paper
 To reproduce the graphs and tables from the paper, follow these steps:
