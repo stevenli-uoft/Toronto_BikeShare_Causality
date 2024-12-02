@@ -45,41 +45,41 @@ bike_lanes <- bike_lanes %>%
 ### We need geometry data for further data processing. So geometry column will
 ### be dropped at the end, so bike_lanes can be saved as parquet file.
 
-# ################# Add Station ID info to 2017 Q3-Q4 rides  ####################
-# # 2017 Q3 and Q4 are missing station ID data. Will join with bike station info to get ID's
-# bike_station <- read_csv(
-#   "data/01-raw_data/02-raw_bikestation_data/bike_station_data.csv")
-#
-# df2017 <- read_csv(
-#   "data/01-raw_data/01-raw_bikeshare_data/Bikeshare Ridership (2017 Q3).csv")
-#
-# # Left join twice by station name for starting and ending station ID
-# new_temp <- df2017 %>%
-#   left_join(bike_station, by=c("from_station_name" = "name")) %>%
-#   rename(from_station_id = station_id) %>%
-#   left_join(bike_station, by=c("to_station_name" = "name")) %>%
-#   rename(to_station_id = station_id) %>%
-#   select(trip_id, trip_start_time, from_station_id, from_station_name,
-#          to_station_id, to_station_name) %>%
-#   drop_na() # filter rows with non-matching station IDs
-#
-# write_csv(new_temp, "data/01-raw_data/01-raw_bikeshare_data/Bikeshare Ridership (2017 Q3).csv")
-#
-# ### Do the same steps again fr Q4 2017
-# df2017 <- read_csv(
-#   "data/01-raw_data/01-raw_bikeshare_data/Bikeshare Ridership (2017 Q4).csv")
-#
-# # Left join twice by station name for starting and ending station ID
-# new_temp <- df2017 %>%
-#   left_join(bike_station, by=c("from_station_name" = "name")) %>%
-#   rename(from_station_id = station_id) %>%
-#   left_join(bike_station, by=c("to_station_name" = "name")) %>%
-#   rename(to_station_id = station_id) %>%
-#   select(trip_id, trip_start_time, from_station_id, from_station_name,
-#          to_station_id, to_station_name) %>%
-#   drop_na() # filter rows with non-matching station IDs
-#
-# write_csv(new_temp, "data/01-raw_data/01-raw_bikeshare_data/Bikeshare Ridership (2017 Q4).csv")
+################# Add Station ID info to 2017 Q3-Q4 rides  ####################
+# 2017 Q3 and Q4 are missing station ID data. Will join with bike station info to get ID's
+bike_station <- read_csv(
+  "data/01-raw_data/02-raw_bikestation_data/bike_station_data.csv")
+
+df2017 <- read_csv(
+  "data/01-raw_data/01-raw_bikeshare_data/Bikeshare Ridership (2017 Q3).csv")
+
+# Left join twice by station name for starting and ending station ID
+new_temp <- df2017 %>%
+  left_join(bike_station, by=c("from_station_name" = "name")) %>%
+  rename(from_station_id = station_id) %>%
+  left_join(bike_station, by=c("to_station_name" = "name")) %>%
+  rename(to_station_id = station_id) %>%
+  select(trip_id, trip_start_time, from_station_id, from_station_name,
+         to_station_id, to_station_name) %>%
+  drop_na() # filter rows with non-matching station IDs
+
+write_csv(new_temp, "data/01-raw_data/01-raw_bikeshare_data/Bikeshare Ridership (2017 Q3).csv")
+
+### Do the same steps again fr Q4 2017
+df2017 <- read_csv(
+  "data/01-raw_data/01-raw_bikeshare_data/Bikeshare Ridership (2017 Q4).csv")
+
+# Left join twice by station name for starting and ending station ID
+new_temp <- df2017 %>%
+  left_join(bike_station, by=c("from_station_name" = "name")) %>%
+  rename(from_station_id = station_id) %>%
+  left_join(bike_station, by=c("to_station_name" = "name")) %>%
+  rename(to_station_id = station_id) %>%
+  select(trip_id, trip_start_time, from_station_id, from_station_name,
+         to_station_id, to_station_name) %>%
+  drop_na() # filter rows with non-matching station IDs
+
+write_csv(new_temp, "data/01-raw_data/01-raw_bikeshare_data/Bikeshare Ridership (2017 Q4).csv")
 
 
 ############################ Cleaning Bike Share Data #########################
