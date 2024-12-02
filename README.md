@@ -9,7 +9,7 @@ The repo is structured as follows:
 
 - `data/00-simulated_data` contains the simulated data used for testing the model and validating analysis methods
 - `data/01-raw_data/`
-  - `01-raw_bikeshare_data` due to the raw Bake Share Ridership data being too large to upload, follow the "Reproducing Graphs and Tables" instruction below to obtain the data
+  - `01-raw_bikeshare_data` due to the raw Bake Share Ridership data being too large to upload, follow the "Reproducing the Paper" instruction below to obtain the data
   - `02-raw_bikestation_data` contains the raw Bike Share stations data obtained from Open Data Toronto [Source](https://open.toronto.ca/dataset/bike-share-toronto/)
   - `03-raw_bikeway_data`  contains the raw bikeway data obtained from Open Data Toronto [Source](https://open.toronto.ca/dataset/cycling-network/)
 - `data/02-analysis_data` contains the cleaned and processed dataset to be used for running the DiD model, and further analysis.
