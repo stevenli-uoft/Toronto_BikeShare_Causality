@@ -32,20 +32,20 @@ To reproduce the graphs and tables from the paper, follow these steps:
 
 ## Dependencies
 This analysis requires R and the following R packages:
-- opendatatoronto (for accessing Toronto Open Data)
-- tidyverse (for data manipulation and visualization)
-- fs (for file system operations)
-- dplyr (for data manipulation)
-- readr (for reading data)
-- jsonlite (for JSON processing)
-- httr (for HTTP requests)
-- fixest (for difference-in-differences estimation)
-- modelsummary (for regression table creation)
-- arrow (for working with parquet files)
-- lubridate (for date/time manipulation)
-- sf (for spatial data processing)
-- testthat (for unit testing)
-- units (for unit conversion and handling)
+- `opendatatoronto` (for accessing Toronto Open Data)
+- `tidyverse` (for data manipulation and visualization)
+- `fs` (for file system operations)
+- `dplyr` (for data manipulation)
+- `readr` (for reading data)
+- `jsonlite` (for JSON processing)
+- `httr` (for HTTP requests)
+- `fixest` (for difference-in-differences estimation)
+- `modelsummary` (for regression table creation)
+- `arrow` (for working with parquet files)
+- `lubridate` (for date/time manipulation)
+- `sf` (for spatial data processing)
+- `testthat` (for unit testing)
+- `units` (for unit conversion and handling)
 
 ## Statement on LLM usage
 Large Language Models such as ___ were used to assist in parts of the data analysis and writing process. The chat logs are saved in the `other/llm_usage` folder for full transparency.
