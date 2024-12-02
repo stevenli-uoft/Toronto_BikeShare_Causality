@@ -35,5 +35,5 @@ To reproduce the graphs and tables from the paper, follow these steps:
 This analysis requires R and the following R packages: `opendatatoronto`, `tidyverse`, `fs`, `dplyr`, `readr`, `jsonlite`, `httr`, `fixest`, `modelsummary`, `arrow`, `lubridate`, `sf`, `testthat`, `units`
 
 ## Statement on LLM usage
-Large Language Models such as ___ were used to assist in parts of the data analysis and writing process. The chat logs are saved in the `other/llm_usage` folder for full transparency.
+Large Language Models, specifically Claude 3.5 Sonnet were used to assist in parts of the data analysis, debugging, and improving text clarity. The complete chat logs are saved in the `other/llm_usage` folder for full transparency.
 
