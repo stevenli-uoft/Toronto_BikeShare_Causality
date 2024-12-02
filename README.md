@@ -8,10 +8,10 @@ This repository contains the code and data analysis for examining the causal imp
 The repo is structured as follows:
 
 - `data/00-simulated_data` contains the simulated data used for testing the model and validating analysis methods
-- `data/01-raw_data`
-  - `data/01-raw_data/01-raw_bikeshare_data` due to the raw Bake Share Ridership data being too large to upload, follow the "Reproducing Graphs and Tables" instruction below to obtain the data and reproduce the paper
-  - `data/01-raw_data/02-raw_bikestation_data` contains the raw Bike Share stations data obtained from Open Data Toronto [Link]([https://open.toronto.ca/dataset/cycling-network/](https://open.toronto.ca/dataset/bike-share-toronto/)
-  - `data/01-raw_data/03-raw_bikeway_data`  contains the raw bikeway data obtained from Open Data Toronto [Link](https://open.toronto.ca/dataset/cycling-network/)
+- `data/01-raw_data/`
+  - `01-raw_bikeshare_data` due to the raw Bake Share Ridership data being too large to upload, follow the "Reproducing Graphs and Tables" instruction below to obtain the data and reproduce the paper
+  - `02-raw_bikestation_data` contains the raw Bike Share stations data obtained from Open Data Toronto [Source](https://open.toronto.ca/dataset/bike-share-toronto/)
+  - `03-raw_bikeway_data`  contains the raw bikeway data obtained from Open Data Toronto [Source](https://open.toronto.ca/dataset/cycling-network/)
 - `data/02-analysis_data` contains the cleaned and processed dataset to be used for running the DiD model, and further analysis.
 - `models` contains fitted models including the main difference-in-differences specifications and robustness checks
 - `other` contains details about LLM chat interactions, sketches of planned visualizations and analyses, and the datasheet documenting our dataset characteristics
@@ -23,7 +23,7 @@ To reproduce the graphs and tables from the paper, follow these steps:
 1. Clone the repository to your local machine.
 2. Go to `scripts/` and run `02-download_data.R`.
   - Note: The November 2022 Bike Share Ridership data is not automatically downloaded by the script due to a file format limitation. Follow these steps manually after running the script:
-    1. Go to Bike Share Toronto Ridership Data in Open Data Toronto Portal [Link](https://open.toronto.ca/dataset/bike-share-toronto-ridership-data/)
+    1. Go to Bike Share Toronto Ridership Data in Open Data Toronto Portal [Source](https://open.toronto.ca/dataset/bike-share-toronto-ridership-data/)
     2. Download the bikeshare-ridership-2022.zip file.
     3. Unzip the file and then unzip Bike share ridership 2022-11.zip.
     4. Import the file Bike share ridership 2022-11.csv into the raw_data/raw_bikeshare_data/ folder.
