@@ -1,14 +1,110 @@
 
+@Dataset{bikeShareData,
+  author = {{Toronto Parking Authority}},
+  year = {2024},
+  month = {09},
+  title = {Bike Share Toronto Ridership Data},
+  url = {https://open.toronto.ca/dataset/bike-share-toronto/}
+}
 
-@Manual{citeR,
-    title = {{R: A Language and Environment for Statistical Computing}},
-    author = {{R Core Team}},
-    organization = {R Foundation for Statistical Computing},
-    address = {Vienna, Austria},
-    year = {2023},
-    url = {https://www.R-project.org/},
+@Dataset{bikeWayData,
+  author = {{Transportation Services}},
+  year = {2024},
+  month = {09},
+  title = {Cycling Network (Bikeways)},
+  url = {https://open.toronto.ca/dataset/cycling-network/}
+}
+
+@manual{torontoOpenData,
+  title = {{opendatatoronto: Access the City of Toronto Open Data Portal}},
+  author = {Sharla Gelfand},
+  year = {2022},
+  note = {R package version 0.1.5},
+  url = {https://CRAN.R-project.org/package=opendatatoronto},
+}
+
+@manual{RCoreTeam2023,
+  author = {{R Core Team}},
+  title = {{R: A Language and Environment for Statistical Computing}},
+  year = {2023},
+  publisher = {R Foundation for Statistical Computing},
+  address = {Vienna, Austria},
+  url = {https://www.R-project.org/},
+}
+
+@manual{ggplot,
+  author = {Hadley Wickham},
+  title = {{Ggplot2: Elegant Graphics for Data Analysis}},
+  publisher = {Springer-Verlag New York},
+  year = {2016},
+  isbn = {978-3-319-24277-4},
+  url = {https://ggplot2.tidyverse.org},
+}
+
+@manual{tidyverse,
+  title = {{Welcome to the tidyverse}},
+  author = {Hadley Wickham and Mara Averick and Jennifer Bryan and Winston Chang and Lucy D'Agostino McGowan and Romain François and Garrett Grolemund and Alex Hayes and others},
+  year = {2019},
+  journal = {Journal of Open Source Software},
+  volume = {4},
+  number = {43},
+  pages = {1686},
+  doi = {10.21105/joss.01686},
+}
+
+@manual{dplyr,
+  title = {{dplyr: A Grammar of Data Manipulation}},
+  author = {Hadley Wickham and Romain François and Lionel Henry and Kirill Müller and Davis Vaughan},
+  year = {2023},
+  note = {R package version 1.1.4},
+  url = {https://CRAN.R-project.org/package=dplyr},
+}
+
+@manual{knitr,
+  title = {{knitr: A General-Purpose Package for Dynamic Report Generation in R}},
+  author = {Yihui Xie},
+  year = {2023},
+  note = {R package version 1.45},
+  url = {https://yihui.org/knitr/},
+}
+
+@manual{lubridate,
+  title = {{Dates and Times Made Easy with {lubridate}}},
+  author = {Garrett Grolemund and Hadley Wickham},
+  journal = {Journal of Statistical Software},
+  year = {2011},
+  volume = {40},
+  number = {3},
+  pages = {1--25},
+  url = {https://www.jstatsoft.org/v40/i03/},
+}
+
+@Article{fixest,
+  title = {Efficient estimation of maximum likelihood models with
+    multiple fixed-effects: the {R} package {FENmlm}},
+  author = {Laurent Berg\'e},
+  year = {2018},
+  journal = {CREA Discussion Papers},
+  number = {13},
   }
   
+@Book{sf,
+  author = {Edzer Pebesma and Roger Bivand},
+  title = {{Spatial Data Science: With applications in R}},
+  year = {2023},
+  publisher = {{Chapman and Hall/CRC}},
+  url = {https://r-spatial.org/book/},
+  doi = {10.1201/9780429459016},
+}
+
+@book{cuborican2024econometrics,
+  title = {Econometrics for Business Analytics},
+  author = {Cuborican},
+  year = {2024},
+  note = {Chapter 11: Difference in Differences},
+  url = {https://bookdown.org/cuborican/RE_STAT/difference-in-differences.html}
+}
+
 @article{Stantcheva2023,
   DOI = {10.1146/annurev-economics-091622-010157},
   year = {2023},
@@ -18,4 +114,59 @@
   pages = {205–234},
   number = {1},
   volume = {15}
+}
+
+@misc{cyclingNetworkPlan,
+  title = {{Cycling Network Plan - City of Toronto}},
+  author = {{City of Toronto}},
+  year = {2024},
+  url = {https://www.toronto.ca/services-payments/streets-parking-transportation/cycling-in-toronto/cycling-pedestrian-projects/cycling-network-plan/}
+}
+
+@misc{toronto_council_agenda,
+  author = {{City of Toronto Council}},
+  title = {Cycling Network Plan Update (Item 2019.IE6.11)},
+  year = {2019},
+  url = {https://secure.toronto.ca/council/agenda-item.do?item=2019.IE6.11}
+}
+
+@misc{toronto_bike_share_expansion,
+  author = {City of Toronto},
+  title = {{Bike Share Toronto announces program expansion, which will bring bike sharing to 20 of Toronto’s 25 wards}},
+  year = {2020},
+  url = {https://www.toronto.ca/news/bike-share-toronto-announces-program-expansion-which-will-bring-bike-sharing-to-20-of-torontos-25-wards/}
+}
+
+@misc{nacto2016,
+  author = {National Association of City Transportation Officials},
+  title = {High-Quality Bike Facilities Increase Ridership and Make Biking Safer},
+  year = {2016},
+  url = {https://nacto.org/2016/07/20/high-quality-bike-facilities-increase-ridership-make-biking-safer/}
+}
+
+@article{MARSHALL2019100539,
+  title = {Why cities with high bicycling rates are safer for all road users},
+  journal = {Journal of Transport & Health},
+  volume = {13},
+  pages = {100539},
+  year = {2019},
+  issn = {2214-1405},
+  doi = {https://doi.org/10.1016/j.jth.2019.03.004},
+  url = {https://www.sciencedirect.com/science/article/pii/S2214140518301488},
+  author = {Wesley E. Marshall and Nicholas N. Ferenchak}
+}
+
+@misc{ttcIntegration,
+  title = {Bike Access and Amenities - Toronto Transit Commission},
+  year = {2024},
+  url = {https://www.ttc.ca/riding-the-ttc/Bike-and-ride/Bike-access-and-amenities}
+}
+
+@report{harris2020lane,
+  title = {Lane Change: Safer Cycling Infrastructure in Toronto},
+  author = {Harris, Anne and Branion-Calles, Michael and Thompson, Calum and Myint, Naing},
+  institution = {Ryerson University, School of Occupational and Public Health, Ryerson City Building Institute},
+  year = {2020},
+  month = {September},
+  url = {https://www.torontomu.ca/content/dam/city-building/reports/Lane_Change_Report_FINAL_Sept_30_2020.pdf},
 }

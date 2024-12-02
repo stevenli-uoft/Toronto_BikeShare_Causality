@@ -6,7 +6,7 @@
 # Pre-requisites: 
 # - 02-download_data.R must have been run first
 # - The required libraries listed below must be installed:
-#     - readr, tidyverse, fs, lubridate
+#     - tidyverse, dplyr, readr, lubridate, fs, sf, units, arrow
 
 #### Workspace setup ####
 library(tidyverse)
@@ -17,17 +17,6 @@ library(fs)
 library(sf)
 library(units)
 library(arrow)
-
-############################# Manage Directories #############################
-# # Create directory to store cleaned data
-# analysis_data_dir <- "data/02-analysis_data"
-# 
-# # Check if the directory exists, if it does, delete it
-# if (dir_exists(analysis_data_dir)) {
-#   dir_delete(analysis_data_dir)  # Delete the folder and its contents
-# }
-# 
-# dir_create(analysis_data_dir)
 
 
 ########################### Cleaning Bike Way Data ############################
@@ -192,7 +181,6 @@ valid_stations <- final_stations$station_id
 filtered_rides <- combined_rides %>%
   filter(
     start_station_id %in% valid_stations
-    # , end_station_id %in% valid_stations # If filtering for both stations near bikeway
   ) %>%
   # Join start station details
   left_join(
@@ -210,37 +198,32 @@ filtered_rides <- combined_rides %>%
              end_nearest_bikeway = nearest_bikeway_id),
     by = c("end_station_id" = "station_id")
   )
-  # filter(start_nearest_bikeway == end_nearest_bikeway) # If filtering for both stations near same bikeway
-
-## Save filtered rides as CSV
-# write_csv(filtered_rides,
-#           "data/02-analysis_data/filtered_ridership.csv")
 
 ################ Create Final Dataset for Diff-in-Diff model ##################
-# Step 1: Identify treatment and control bikeways
+###### Identify treatment and control bikeways
 bikeway_status <- bike_lanes %>%
   mutate(
     # Determine treatment year (either UPGRADED or INSTALLED if no upgrade)
-    upgrade_installed_year = case_when(UPGRADED > 0 ~ UPGRADED
+    construct_year = case_when(UPGRADED > 0 ~ UPGRADED
                                        , TRUE ~ INSTALLED),
     
     # Flag if bikeway was treated in our window of interest (2019-2021)
-    is_treated = upgrade_installed_year >= 2019 & upgrade_installed_year <= 2021,
+    is_treated = construct_year >= 2019 & construct_year <= 2021,
     
     # Flag control bikeways (not constructed/upgraded during study period)
     is_control = (INSTALLED < 2017 & (is.na(UPGRADED) | UPGRADED < 2017)),
     
     # Label treatment type as upgraded or newly-installed bike lanes
-    treatment_type = case_when(
+    sub_treatment_type = case_when(
       UPGRADED >= 2019 & UPGRADED <= 2021 ~ 'Upgraded'
       , INSTALLED >= 2019 & INSTALLED <= 2021 ~ 'Newly-Installed'
       , TRUE ~ 'No Treatment')
   ) %>%
-  select(bikeway_id = OBJECTID, upgrade_installed_year, is_treated, is_control,
-         INFRA_HIGHORDER, treatment_type) %>%
+  select(bikeway_id = OBJECTID, construct_year, is_treated, is_control,
+         bikeway_type = INFRA_HIGHORDER, sub_treatment_type) %>%
   st_drop_geometry()
 
-# Step 2: Get monthly rides for each bikeway and adjust for seasonality
+###### Get monthly rides for each bikeway and adjust for seasonality
 # First get raw monthly rides
 bikeway_monthly_rides <- filtered_rides %>%
   mutate(
@@ -248,7 +231,7 @@ bikeway_monthly_rides <- filtered_rides %>%
     month = month(start_date)
   ) %>%
   group_by(start_nearest_bikeway, year_month) %>%
-  summarize(bikeway_monthly_rides = n(), .groups = 'drop')
+  summarize(monthly_rides = n(), .groups = 'drop')
 
 # Calculate seasonal indices using all data
 seasonal_indices <- filtered_rides %>%
@@ -280,28 +263,28 @@ bikeway_monthly_rides <- bikeway_monthly_rides %>%
   left_join(seasonal_indices %>% select(month, seasonal_index), by = "month") %>%
   mutate(
     # Adjust for seasonality by dividing by seasonal index
-    bikeway_monthly_rides_adjusted = bikeway_monthly_rides / seasonal_index
+    monthly_rides_adj = monthly_rides / seasonal_index
   ) %>%
   select(-month, -seasonal_index) # Remove helper columns
 
-# Step 3: Create treatment dataset with monthly periods
+###### Create treatment dataset with monthly periods
 treatment_data <- bikeway_status %>%
   filter(is_treated) %>%
   mutate(
     analysis_period = case_when(
-      upgrade_installed_year == 2019 ~ "2017-2021",
-      upgrade_installed_year == 2020 ~ "2018-2022",
-      upgrade_installed_year == 2021 ~ "2019-2023"
+      construct_year == 2019 ~ "2017-2021",
+      construct_year == 2020 ~ "2018-2022",
+      construct_year == 2021 ~ "2019-2023"
     )
   ) %>%
   # Create template for all periods
-  group_by(bikeway_id, upgrade_installed_year, analysis_period) %>%
+  group_by(bikeway_id, construct_year, analysis_period) %>%
   do({
     # Pre-treatment: 24 months before treatment year
     pre_treatment <- tibble(
       year_month = seq(
-        from = ymd(paste0(.$upgrade_installed_year[1] - 2, "-01-01")),
-        to = ymd(paste0(.$upgrade_installed_year[1] - 1, "-12-01")),
+        from = ymd(paste0(.$construct_year[1] - 2, "-01-01")),
+        to = ymd(paste0(.$construct_year[1] - 1, "-12-01")),
         by = "months"
       ),
       period = "pre"
@@ -310,8 +293,8 @@ treatment_data <- bikeway_status %>%
     # Treatment year: all months in treatment year
     treatment_year <- tibble(
       year_month = seq(
-        from = ymd(paste0(.$upgrade_installed_year[1], "-01-01")),
-        to = ymd(paste0(.$upgrade_installed_year[1], "-12-01")),
+        from = ymd(paste0(.$construct_year[1], "-01-01")),
+        to = ymd(paste0(.$construct_year[1], "-12-01")),
         by = "months"
       ),
       period = "treatment"
@@ -320,8 +303,8 @@ treatment_data <- bikeway_status %>%
     # Post-treatment: 24 months after treatment year
     post_treatment <- tibble(
       year_month = seq(
-        from = ymd(paste0(.$upgrade_installed_year[1] + 1, "-01-01")),
-        to = ymd(paste0(.$upgrade_installed_year[1] + 2, "-12-01")),
+        from = ymd(paste0(.$construct_year[1] + 1, "-01-01")),
+        to = ymd(paste0(.$construct_year[1] + 2, "-12-01")),
         by = "months"
       ),
       period = "post"
@@ -336,18 +319,18 @@ treatment_data <- bikeway_status %>%
     calendar_year = year(year_month),
     relative_month = case_when(
       period == "pre" ~ as.numeric(interval(
-        ymd(paste0(upgrade_installed_year, "-01-01")), 
+        ymd(paste0(construct_year, "-01-01")), 
         year_month
       ) %/% months(1)),
       period == "treatment" ~ 0,
       period == "post" ~ as.numeric(interval(
-        ymd(paste0(upgrade_installed_year + 1, "-01-01")), 
+        ymd(paste0(construct_year + 1, "-01-01")), 
         year_month
       ) %/% months(1)) + 1
     )
   )
 
-# Step 4: Create control dataset with monthly periods
+###### Create control dataset with monthly periods
 set.seed(778) # equally distributing control bikeways to 3 periods
 control_data <- bikeway_status %>%
   filter(is_control) %>%
@@ -418,7 +401,7 @@ control_data <- bikeway_status %>%
     )
   )
 
-# Step 5: Combine treatment and control data, join with monthly rides
+###### Combine treatment and control data, join with monthly rides
 final_df <- bind_rows(
   treatment_data,
   control_data
@@ -430,14 +413,17 @@ final_df <- bind_rows(
   # Add left join with original bikeway_status to ensure these columns are preserved
   left_join(
     bikeway_status %>% 
-      select(bikeway_id, INFRA_HIGHORDER, treatment_type),
+      select(bikeway_id, bikeway_type, sub_treatment_type),
     by = "bikeway_id"
   ) %>%
   mutate(
-    bikeway_monthly_rides = replace_na(bikeway_monthly_rides, 0),
-    bikeway_monthly_rides_adjusted = replace_na(bikeway_monthly_rides_adjusted, 0)
+    monthly_rides = replace_na(monthly_rides, 0),
+    monthly_rides_adj = replace_na(monthly_rides_adj, 0)
   ) %>%
-  arrange(analysis_period, treatment, bikeway_id, year_month)
+  arrange(analysis_period, treatment, bikeway_id, year_month) %>%
+  select(bikeway_id, construct_year, period, treatment, year_month, 
+         calendar_year, relative_month, bikeway_type, sub_treatment_type,
+         monthly_rides, monthly_rides_adj) 
 
 
 ########################### Save final dataset ##############################
@@ -446,61 +432,3 @@ write_parquet(final_df, "data/02-analysis_data/final_df.parquet")
 ############### Save bike lanes data, drop geometry column first ############
 bike_lanes <- bike_lanes %>% st_drop_geometry()
 write_parquet(bike_lanes, "data/02-analysis_data/bikeway_data.parquet")
-
-####### NOTES:
-# 2017-2023 rides: 21.8m rides
-# Rides from 2017-2023 where start_station is near bikelane: 13.8m rides
-# After joining with control and treatment bikeways, there are ~8m rides
-#
-# This is because, we only gather 5 year periods of data for each bikeway, since
-# our analysis focused on 5 relative years, +-2 around treatment year. Each control
-# bikeway will have randomly selected pseudo-treatment years, with +- 2 years.
-# So because we only focus on 5 years per bikeway, it won't contain all bike rides
-# For example, we randomly selected bikewayID=4 as control bikeway, with 
-# pseudo-treatment year as 2020, so bikewayID=4 will have data from 2018-2022. 
-# So 2017 and 2023 rides for bikewayID=4 will be dropped from final_df.
-#
-#
-#
-# For filtered rides where start and end station is near bikelane: 1.01m rides
-# After joining with control and treatment bikeways, there are ~672k rides
-#
-
-
-# final_df %>%
-#   group_by(relative_month) %>%
-#   summarise(total_rides = sum(bikeway_monthly_rides)) %>%
-#   ggplot(aes(x = relative_month, y = total_rides)) +
-#   geom_line() +
-#   geom_point(alpha = 0.5) +
-#   theme_minimal() +
-#   labs(
-#     title = "Total Monthly Bike Share Rides Near Bikeways",
-#     x = "Date",
-#     y = "Number of Rides",
-#     caption = "Note: Only includes rides within 100m of bikeways in treatment/control groups"
-#   ) +
-#   theme(
-#     plot.title = element_text(hjust = 0.5),
-#     axis.text.x = element_text(angle = 45, hjust = 1)
-#   )
-# 
-# avg_relative_monthly_rides <- final_df %>%
-#   filter(relative_month > 0 & treatment == TRUE)%>%
-#   # group_by(relative_month) %>%
-#   summarise(total_rides_adjusted = mean(bikeway_monthly_rides_adjusted),
-#             total_rides = mean(bikeway_monthly_rides))
-# 
-# temp <- filtered_rides %>%
-#   mutate(
-#     year_month = floor_date(start_date, "month")
-#   ) %>%
-#   group_by(year_month) %>%
-#   summarize(bikeway_monthly_rides = n(), .groups = 'drop')
-# 
-# temp %>%
-#   group_by(year_month) %>%
-#   ggplot(aes(x = year_month, y = bikeway_monthly_rides)) +
-#   geom_line() +
-#   geom_point(alpha = 0.5) +
-#   theme_minimal()
