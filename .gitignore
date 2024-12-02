@@ -6,8 +6,6 @@
 .DS_Store
 
 # Data files
-data/00-simulated_data
-data/02-analysis_data
 data/01-raw_data/01-raw_bikeshare_data
 
 # History files
