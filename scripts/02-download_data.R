@@ -25,7 +25,7 @@ library(httr)
 # 1. Go to Open Data Toronto and search up "Bike Share Toronto Ridership Data"
 # 2. Download the bikeshare-ridership-2022 zip file
 # 3. Unzip the file, and unzip "Bike share ridership 2022-11.zip"
-# 4. Import "Bike share ridership 2022-11.csv" into 01-raw_data/02-raw_bikeshare_data
+# 4. Import "Bike share ridership 2022-11.csv" into `data/01-raw_data/01-raw_bikeshare_data`
 ###############################################################################
 
 
