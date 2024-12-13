@@ -99,7 +99,7 @@ The notable unadjusted ridership activity during the treatment period (relative 
 
 ```{r}
 #| label: fig-avg-monthly-ridership
-#| fig-cap: "Average ridership by relative months to treatment"
+#| fig-cap: "Average bike share ridership by relative months to bikeway treatment period"
 #| echo: false
 #| warning: false
 #| message: false
@@ -126,7 +126,7 @@ ggplot(ridership_by_month, aes(x = relative_month, y = rides, color = metric)) +
   ) +
   scale_color_manual(
     values = c("grey10", "blue"),
-    labels = c("Raw Rides", "Seasonally Adjusted")
+    labels = c("Raw Rides", "Seasonally Adjusted Rides")
   ) +
   theme_minimal() +
   theme(legend.position = "top",
@@ -144,7 +144,7 @@ Appendix @sec-additional-figures provides a further breakdown on types of bikewa
 
 ```{r}
 #| label: fig-treatment-control-count
-#| fig-cap: "Total Bikeway Count in Control Vs. Treatment Group"
+#| fig-cap: "Total bikeway count in control and treatment group"
 #| echo: false
 #| warning: false
 #| message: false
@@ -197,7 +197,7 @@ To explore treatment effect heterogeneity, we examine two additional dimensions 
 
 ```{r}
 #| label: fig-infra-type
-#| fig-cap: "Infrastrucutre Type Distribution between Control and Treatment Group"
+#| fig-cap: "Bikeway type distribution between control and treatment group"
 #| echo: false
 #| warning: false
 #| message: false
@@ -228,7 +228,7 @@ ggplot(infra_counts, aes(x = bikeway_type, y = count, fill = treatment)) +
 
 ```{r}
 #| label: fig-treatment-type-total
-#| fig-cap: "Number of New-Installations Vs Upgrades in Treatment Group"
+#| fig-cap: "Number of new-installations and upgrades of bikeways in treatment Group"
 #| echo: false
 #| warning: false
 #| message: false
@@ -316,7 +316,7 @@ A key assumption of our difference-in-differences design is that treated and con
 
 ```{r}
 #| label: fig-parallel
-#| fig-cap: "Parallel Trends Test: Average Monthly Rides in Pre-Treatment Period"
+#| fig-cap: "Parallel Trends Test: Average monthly rides in pre-treatment period"
 #| echo: false
 #| warning: false
 #| message: false
@@ -360,9 +360,13 @@ The high R-squared value of 0.785 indicates that our model explains a substantia
 main_did <- readRDS(here::here("models/main_did.rds"))
 
 modelsummary(
-  list("Main DiD Model" = main_did),
-  stars = TRUE,
-  gof_map = c("nobs", "r.squared", "adj.r.squared")
+  list("Main DiD Estimates" = main_did),
+  statistic = "s.e. = {std.error}, p = {p.value}",
+  gof_map = c("nobs", "r.squared", "adj.r.squared"),
+  coef_map = c(
+    "period::post:treatment" = "Post-Treatment Effect",
+    "period::treatment:treatment" = "During-Treatment Effect"
+  ),
 )
 ```
 
@@ -380,8 +384,7 @@ To verify that our results are not driven by spurious correlations, we conduct a
 
 placebo_random_did <- readRDS(here::here("models/placebo_random_did.rds"))
 
-# Randomly assign treatment
-set.seed(778)
+set.seed(778) # set same seed as model_data implementation script
 
 placebo_random <- analysis_data %>%
   # First get a list of unique bikeway IDs
@@ -396,9 +399,13 @@ placebo_random <- analysis_data %>%
   right_join(analysis_data, by = "bikeway_id")
 
 modelsummary(
-  list("Placebo Test - Random Assignment" = placebo_random_did),
-  stars = TRUE,
-  gof_map = c("nobs", "r.squared", "adj.r.squared")
+  list("Placebo Test Estimates" = placebo_random_did),
+  statistic = "s.e. = {std.error}, p = {p.value}",
+  gof_map = c("nobs", "r.squared", "adj.r.squared"),
+  coef_map = c(
+    "period::post:placebo_treatment" = "Post-Placebo Treatment Effect",
+    "period::treatment:placebo_treatment" = "During-Placebo Treatment Effect"
+  ),
 )
 
 ```
@@ -416,20 +423,19 @@ We examine treatment effect heterogeneity across different types of infrastructu
 did_hetero_lane <- readRDS(here::here("models/did_hetero_lane_type.rds"))
 
 modelsummary(
-  list("Heterogeneous Effects - Bikeway Type" = did_hetero_lane),
-  stars = TRUE,
+  list("Heterogenous Estimates by Bikeway Type" = did_hetero_lane),
+  statistic = "s.e. = {std.error}, p = {p.value}",
   gof_map = c("nobs", "r.squared", "adj.r.squared"),
   coef_map = c(
-  "period::treatment:treatment_infra::Control" = "Treatment x Control",
-  "period::treatment:treatment_infra::Treated-OnRoad" = "Treatment x Treated-OnRoad",
-  "period::treatment:treatment_infra::Treated-Protected" = "Treatment x Treated-Protected",
-  "period::treatment:treatment_infra::Treated-Shared" = "Treatment x Treated-Shared",
-  "period::post:treatment_infra::Control" = "Post x Control",
-  "period::post:treatment_infra::Treated-OnRoad" = "Post x Treated-OnRoad",
-  "period::post:treatment_infra::Treated-Protected" = "Post x Treated-Protected",
-  "period::post:treatment_infra::Treated-Shared" = "Post x Treated-Shared"
-  ),
-  output = "latex"
+  "period::treatment:treatment_infra::Control" = "During-Treatment Effect: Control Bikeways",
+  "period::treatment:treatment_infra::Treated-Shared" = "During-Treatment Effect: Shared Roadways",
+  "period::treatment:treatment_infra::Treated-OnRoad" = "During-Treatment Effect: On-Road Lanes",
+  "period::treatment:treatment_infra::Treated-Protected" = "During-Treatment Effect: Protected Lanes",
+  "period::post:treatment_infra::Control" = "Post-Treatment Effect: Control Bikeways",
+  "period::post:treatment_infra::Treated-Shared" = "Post-Treatment Effect: Shared Roadways",
+  "period::post:treatment_infra::Treated-OnRoad" = "Post-Treatment Effect: On-Road Lanes",
+  "period::post:treatment_infra::Treated-Protected" = "Post-Treatment Effect: Protected Lanes"
+  )
 )
 ```
 
@@ -445,16 +451,15 @@ modelsummary(
 did_hetero_treat_type <- readRDS(here::here("models/did_hetero_treat_type.rds"))
 
 modelsummary(
-  list("Heterogeneous Effects - Treatment Type" = did_hetero_treat_type),
-  stars = TRUE,
+  list("Heterogeneous Estimates by Implementation" = did_hetero_treat_type),
+  statistic = "s.e. = {std.error}, p = {p.value}",
   gof_map = c("nobs", "r.squared", "adj.r.squared"),
   coef_map = c(
-    "period::treatment:sub_treatment_type::Upgraded" = "Treatment x Upgraded",
-    "period::treatment:sub_treatment_type::Newly-Installed" = "Treatment x Newly Installed",
-    "period::post:sub_treatment_type::Upgraded" = "Post x Upgraded",
-    "period::post:sub_treatment_type::Newly-Installed" = "Post x Newly Installed"
-  ),
-  output = "latex"
+    "period::treatment:sub_treatment_type::Upgraded" = "During-Treatment Effect: Upgraded",
+    "period::treatment:sub_treatment_type::Newly-Installed" = "During-Treatment Effect: Newly Installed",
+    "period::post:sub_treatment_type::Upgraded" = "Post-Treatment Effect: Upgraded",
+    "period::post:sub_treatment_type::Newly-Installed" = "Post-Treatment Effect: Newly Installed"
+  )
 )
 ```
 
@@ -515,7 +520,7 @@ This research contributes to our understanding of how cycling infrastructure inf
 
 \appendix
 
-# Appendix {.unnumbered}
+# Appendix {-}
 # Idealized Survey Methodology {#sec-ideal-survey}
 ## Survey Objectives
 Following Stantcheva's [-@Stantcheva2023] framework, we recognize that surveys are not merely for data colletion, but rather "creating the process that will generate the data." The goal of our idealized survey is to measure otherwise "invisible factors" regarding cycling infrastructures influence on bike share usage, specifically:
@@ -675,7 +680,7 @@ These processing steps create a dataset structured to identify the causal impact
 # Additional Tables & Figures {#sec-additional-figures}
 ```{r}
 #| label: tbl-sample-data
-#| tbl-cap: "Sample of processed dataset for DiD Model"
+#| tbl-cap: "Sample of processed dataset for DiD Model and analysis"
 #| echo: false
 #| warning: false
 #| message: false
