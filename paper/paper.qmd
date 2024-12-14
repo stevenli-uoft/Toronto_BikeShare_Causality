@@ -1,12 +1,12 @@
 ---
-title: "Understanding the Causal Impact of Bike Lane Installation on Urban Cycling Adoption"
+title: "Understanding the Causal Impact of Bikeway Installation on Urban Cycling Adoption"
 subtitle: "A Difference-in-Differences Analysis Shows Protected Bike Lanes Triple Bike Share Ridership in Toronto, 2017-2023"
 author: 
   - Steven Li
 thanks: "Code and data are available at: [https://github.com/stevenli-uoft/Toronto_BikeShare_Causality](https://github.com/stevenli-uoft/Toronto_BikeShare_Causality)."
 date: today
 date-format: long
-abstract: "We examine the causal effect of cycling infrastructure improvements on Bike Share Toronto ridership by analyzing how different types of bikeways influence system usage between 2017-2023. Using a difference-in-differences design with over 7.4 million rides across 1,191 bikeways, we find that infrastructure improvements led to significant increases in ridership, with post-implementation effects reaching 133.1 additional monthly rides per bikeway, translating to approximately 300,000 additional annual rides across all treated segments. Protected lanes demonstrate the strongest impact, generating 381.9 additional monthly rides - more than double the effect of on-road lanes (169.2 rides) and triple that of shared roadways (111.7 rides), while upgrades to existing infrastructure showed more immediate benefits than new installations. Our findings suggest that strategic implementation of protected infrastructure can substantially increase cycling activity, with implications for Toronto's planned addition of 100 kilometers of cycling infrastructure between 2025-2027. These results provide evidence-based guidance for cities working to encourage sustainable transportation through cycling infrastructure development."
+abstract: "We investigate the causal effects of cycling infrastructure improvements on Bike Share ridership in Toronto between 2017 and 2023. Using a difference-in-differences design with over 7.4 million rides across 1,191 bikeways, we find that treated segments experience an additional 133.1 monthly ride per bikeway, translating to nearly 300,000 additional rides annually, or 40% of all rides on treated bikeways post-improvement. Protected lanes generate the largest gains, more than tripling usage compared to shared roadways, while upgrades to existing bikeways outpace the benefits of new installations.Our findings suggest that strategic implementation of protected infrastructure can substantially increase cycling activity, with implications for Toronto's planned addition of 100 kilometers of cycling infrastructure between 2025-2027. These results provide evidence-based guidance for cities working to encourage sustainable transportation through cycling infrastructure development."
 format:
   pdf:
     toc: true
@@ -33,22 +33,22 @@ library(modelsummary)
 
 analysis_data <- read_parquet(here::here("data/02-analysis_data/final_df.parquet"))
 ```
- 
+
 \newpage
 # Introduction
 Cycling infrastructure plays an essential role in urban transportation, yet quantifying its impact on cycling adoption remains challenging. While previous research demonstrates that protected bike lanes can reduce cycling injuries by up to 89% [@harris2020lane] and increase ridership by up to 171% on specific routes [@nacto2016], less is known about how different types of infrastructure improvements affect bike share system utilization. This knowledge gap is particularly relevant for Toronto, where the city previously committed to significant cycling infrastructure expansion while simultaneously growing its bike share network from 2,854 stations in 2016 to over 6,850 stations in 2020 [@toronto_bike_share_expansion]. Understanding this relationship is essential as cities increasingly rely on bike share systems to complement public transit and provide sustainable transportation options.
 
 Our estimand is the causal effect of cycling infrastructure improvements on monthly Bike Share Toronto ridership, measured as the difference in average monthly rides between treated and control bikeways before and after infrastructure changes during 2017-2023. Specifically, we estimate how the installation of three infrastructure types (protected lanes, on-road lanes, and shared roadways) and two implementation approaches (new installations versus upgrades) affect the number of Bike Share trips originating within 100 meters of improved bikeways. Using a difference-in-differences design that combines ridership data with infrastructure locations, we isolate these treatment effects while controlling for broader trends in cycling adoption.
 
-Our analysis indicates that infrastructure improvements significantly increase bike share ridership, with effects varying substantially by implementation approach. While we observe modest initial increases of 32.4 rides per month during the treatment year, post-implementation effects grow substantially to 133.1 additional monthly rides per bikeway (p < 0.01). In aggregate, this translates to approximately 300,000 additional annual rides across all 186 treated segments - a significant impact given that these improvements represent only 12.6% of Toronto's total bikeways. Protected bike lanes show particularly strong effects, generating 381.9 additional monthly rides post-implementation (p < 0.001) - more than twice the effect of on-road lanes (169.2 rides, p < 0.001) and triple that of shared roadways (111.7 rides, p < 0.001). Notably, these gains occurred despite treated bikeways having higher initial ridership at 209.03 monthly rides, compared to control bikeways 85.59 monthly rides pre-treatment. This suggests infrastructure improvements can substantially increase cycling activity even on popular routes.
+Our analysis indicates that infrastructure improvements significantly increase bike share ridership, with effects varying substantially by implementation approach. While we observe modest initial increases of 32.4 rides per month during the treatment year, post-implementation effects grow substantially to 133.1 additional monthly rides per bikeway. In aggregate, this translates to approximately 300,000 additional annual rides across all 186 treated segments, with improvements directly attributable to about 40% of the 1.48 million total rides recorded on these segments in the two years following changes. This substantial impact is particularly notable given that these improvements represent only 16% of bikeways in our study. Protected bike lanes show particularly strong effects, generating 381.9 additional monthly rides post-implementation - more than twice the effect of on-road lanes (169.2 rides) and triple that of shared roadways (111.7 rides). Notably, these gains occurred despite treated bikeways having higher initial ridership at 209.03 monthly rides, compared to control bikeways 85.59 monthly rides pre-treatment. This suggests infrastructure improvements can substantially increase cycling activity even on popular routes.
 
-These findings have important implications for urban transportation policy as cities work to expand sustainable mobility options. Toronto's commitment to add 100 kilometers of new cycling infrastructure between 2025 and 2027 [@cyclingNetworkPlan] represents a significant opportunity to enhance cycling adoption, particularly if implemented with attention to the differential impacts of various infrastructure types. The substantial ridership gains observed from improving just 12.6% of the network suggest that targeted infrastructure investments can have outsized impacts on system utilization. Furthermore, our finding that improvements to already-popular routes generated significant additional ridership challenges the assumption that infrastructure investments should prioritize underserved areas, highlighting the complex trade-offs cities face when allocating limited resources for cycling infrastructure.
+These findings have important implications for urban transportation policy as cities work to expand sustainable mobility options. Toronto's commitment to add 100 kilometers of new cycling infrastructure between 2025 and 2027 [@cyclingNetworkPlan] represents a significant opportunity to enhance cycling adoption, particularly if implemented with attention to the differential impacts of various infrastructure types. The substantial ridership gains observed from improving just 16% of the network suggest that targeted infrastructure investments can have outsized impacts on system utilization. Furthermore, our finding that improvements to already-popular routes generated significant additional ridership challenges the assumption that infrastructure investments should prioritize underserved areas, highlighting the complex trade-offs cities face when allocating limited resources for cycling infrastructure.
 
 The remainder of this paper proceeds as follows. @sec-data describes our data sources and measurement approach. @sec-model outlines our difference-in-differences methodology and identification strategy. @sec-results presents our main results and robustness checks. @sec-discussion discusses the implications of our findings and potential directions for future research. @sec-ideal-survey introduces an idealized survey methodology designed to directly address our research question. The appendices provide supplementary materials, including detailed data processing steps in @sec-data-processing and additional figures and analysis in @sec-additional-figures.
 
 # Data {#sec-data}
 ## Overview
-This study draws on three datasets from the City of Toronto's Open Data Portal [@torontoOpenData]: the Cycling Network (Bikeways) data [@bikeWayData], and both Bike Share Ridership and Stations data [@bikeShareData]. Together, these datasets provide a detailed view of Toronto's cycling landscape, capturing infrastructure development from 2001-2023 and ridership patterns from 2017-2023. While alternative cycling metrics exist, such as manual traffic counts and automated counter data, these sources suffer from inconsistent maintenance and ceased updates after 2019. Our selected datasets offer better temporal coverage and data quality, with regular updates ensuring current, reliable measurements of both infrastructure changes and system usage.
+This study draws on three datasets from the City of Toronto's Open Data Portal [@torontoOpenData]: the Cycling Network (Bikeways) data [@bikeWayData], and both Bike Share Ridership and Stations data [@bikeShareData]. Together, these datasets provide a detailed view of Toronto's cycling landscape, capturing bikeway infrastructure development from 2001-2023 and ridership patterns from 2017-2023. While alternative cycling metrics exist, such as manual and automated cycling traffic data, these sources suffer from inconsistent maintenance and ceased updates after 2019. Our selected datasets offer better temporal coverage and data quality, with regular updates ensuring current, reliable measurements of both infrastructure changes and bike share system usage.
 
 All data cleaning and analysis was conducted using R [@RCoreTeam2023], with key packages including `tidyverse` [@tidyverse], `dplyr` [@dplyr], `readr` [@readr], `jsonlite` [@jsonlite], `arrow` [@arrow], and `sf` [@sf] for spatial analysis.
 
@@ -59,7 +59,7 @@ The Cycling Network data captures two distinct types of infrastructure changes r
 1. **New Installation**: The construction of new bikeway segments that expand the network's reach
 2. **Upgrades**: Modifications to existing segments that enhance their safety or functionality
 
-When either change occurs, the location, infrastructure type, and year of modification are documented. A key limitation of this measurement process is its temporal granularity - while the year of each change is recorded, the specific month and day are not, constraining our ability to pinpoint exact implementation dates.
+When either change occurs, the location, infrastructure type, and year of modification are documented. A key limitation of this measurement process is its temporal granularity - while the year of each change is recorded, the specific start/end date of construction are not documented, constraining our ability to pinpoint exact implementation dates.
 
 ### Ridership and Stations Measurement
 Bike Share ridership is measured through an automated system that anonymously records every trip's start and end points, time, and associated station IDs. The measurement process follows these steps:
@@ -72,9 +72,15 @@ Bike Share ridership is measured through an automated system that anonymously re
 The Public Bicycle System Company (PBSC) and City of Toronto also maintains detailed Bike Share stations records, documenting each station's location and capacity metrics [@bikeWayData].
 
 ### Limitations and Potential Biases
-Our analysis faces two primary measurement challenges that could affect causal inference. First, the Bike Share system cannot track actual route choices between endpoints. To address this, we focus on trips originating from stations within 100 meters of bikeways, assuming proximity indicates usage. While this provides a reasonable proxy, it may introduce selection bias by excluding riders who use bikeways despite starting from more distant stations.
+Our analysis faces several important limitations and biases that affect both the interpretation of results and their broader applicability. First, our temporal measurement of infrastructure changes lacks precision as we observe only the year of implementation, not specific dates. This annual granularity likely understates treatment-year effects by combining pre-construction, construction, and post-completion periods within the same temporal window. 
 
-Second, our measure of infrastructure changes may suffer from reverse causality bias. The city might prioritize upgrades for routes that already show high cycling traffic, potentially overstating the causal effect of infrastructure improvements on usage. We attempt to mitigate this through our difference-in-differences design and by examining pre-treatment trends, but this limitation should be considered when interpreting our results.
+A second key limitation stems from the concurrent expansion of Toronto's Bike Share network during our study period. The system grew from 2,854 stations in 2016 to over 6,850 stations in 2020, with new stations often strategically placed near improved infrastructure [@toronto_bike_share_expansion]. While this coordinated deployment reflects real-world policy implementation, it complicates our causal interpretation, as ridership increase could be attributed to improved station accessibility, rather than bikeway infrastructure improvements. Our study design helps control for system-wide growth, but cannot fully separate these complementary effects.
+
+Third, our study faces selection bias, as infrastructure improvements may be systematically targeted toward areas with rising cycling demand or changing demographics. Toronto's decision to upgrade specific routes likely considers factors like population density, proximity to employment centers, and existing ridership patterns. Without controlling for these neighborhood-level characteristics, our treatment effects may partially capture broader urban changes rather than purely causal infrastructure impacts. 
+
+Finally, our analysis assumes that bike share rides starting near bikeways indicate infrastructure usage. While we determine a 100-meter proximity threshold as a reasonable proxy, we cannot observe actual route choices. This limitation may lead us to under-count infrastructure usage by excluding riders who access lanes from more distant starting points, or over-count usage if riders don't ultimately use nearby lanes. This measurement challenge is especially acute in dense urban areas where multiple bikeways and stations create complex route options.
+
+These limitations and biases suggest several promising directions for future research, particularly through user surveys that could directly measure route choices and infrastructure preferences. Additionally, more granular implementation data and neighborhood-level controls could help isolate infrastructure effects from concurrent changes in the urban environment.
 
 ## Data Cleaning
 The data cleaning process involved several key steps to create our final analysis panel dataset (detailed methodology available in Appendix @sec-data-processing):
@@ -92,7 +98,7 @@ A vital methodological choice was the use of relative timing rather than calenda
 @tbl-sample-data in Appendix @sec-additional-figures provides a sample of our processed dataset.
 
 ## Outcome Variables
-Our primary outcome variable is seasonally-adjusted monthly ridership for each bikeway (`monthly_rides_adj`). @fig-avg-monthly-ridership shows several important patterns in ridership behavior. The raw ridership (black line) displays pronounced seasonal fluctuations, with consistent peaks during summer months and troughs in winter, reflecting Toronto's strong cycling seasonality. After applying seasonal adjustments (blue line), these cyclical patterns are smoothed while preserving the underlying growth trends. Both treatment and control groups show a general upward trend in ridership over the observation period, suggesting broader growth in cycling activity across Toronto's network.
+Our outcome variable is seasonally-adjusted monthly ridership for each bikeway, and @fig-avg-monthly-ridership shows several important patterns in ridership behavior. The raw ridership (black line) displays pronounced seasonal fluctuations, with consistent peaks during summer months and troughs in winter, reflecting Toronto's strong cycling seasonality. These seasonal patterns remain visible even when using relative months because bikeways in our sample received treatments in different calendar years, but share the same relative month structure (e.g., -24 to +24 months around treatment). After applying seasonal adjustments (blue line), these cyclical patterns are smoothed while preserving the underlying growth trends. Both treatment and control groups show a general upward trend in ridership over the observation period, suggesting broader growth in cycling activity across Toronto's network.
 
 The notable unadjusted ridership activity during the treatment period (relative month 0) reflects both the granularity of our data and real-world implementation patterns. Since we observe only the year of infrastructure changes due to data limitations, all twelve months of the treatment year are assigned to relative month 0. This ridership activity captures both partial-year effects (as changes may occur at different points throughout the year) and continued system usage during implementation.
 
@@ -138,7 +144,7 @@ ggplot(ridership_by_month, aes(x = relative_month, y = rides, color = metric)) +
 ```
 
 ## Treatment Variables
-Our main treatment variable (`treatment`) indicates whether a bikeway received an infrastructure change (either an upgrade or new installation) during our study period 2019-2021. @fig-treatment-control-count presents the distribution of bikeways between treatment and control groups, showing a larger pool of control bikeways to enable robust comparison with treated segments. 
+Our main treatment variable indicates whether a bikeway received an infrastructure change (either an upgrade or new installation) during our study period 2019-2021. @fig-treatment-control-count presents the distribution of bikeways between treatment and control groups, showing a larger pool of control bikeways to enable robust comparison with treated segments. 
 
 Appendix @sec-additional-figures provides a further breakdown on types of bikeways installed and upgraded throughout the years. @fig-bikeway_type_constructed_graph in the appendix shows consistent bikeway installations every year after 2010, with protected lanes most commonly installed. @fig-bikeway_type_upgraded_graph presents yearly bikeway upgrades, showing an increase during our treatment period (2019-2021), especially with protected bike lanes.
 
@@ -175,7 +181,7 @@ ggplot(installation_counts,
         )
 ```
 
-To explore treatment effect heterogeneity, we examine two additional dimensions of infrastructure changes:
+To explore treatment effect heterogeneity, we further examine two additional dimensions of infrastructure changes:
 
 - **Bikeway Type**:
 
@@ -189,11 +195,9 @@ To explore treatment effect heterogeneity, we examine two additional dimensions 
   > - *Upgrades*: Improvements to existing infrastructure
   > - *New Installations*: Addition of new cycling routes
 
-@fig-infra-type presents distinct infrastructure patterns between groups. While protected lanes dominate both treatment and control groups, comprising 50% and 54% respectively, the distribution of other types differs notably. The treatment group shows a higher proportion of on-road lanes relative to shared roadways, suggesting a deliberate strategy of upgrading less protected infrastructure. This aligns with Toronto's broader policy goal of enhancing cyclist safety through infrastructure improvements [@toronto_council_agenda].
+@fig-infra-type presents distinct infrastructure patterns between groups. While protected lanes dominate both treatment and control groups, comprising 50% and 54% respectively, the distribution of other types differs notably. The treatment group shows a higher proportion of on-road lanes relative to shared roadways, suggesting a deliberate strategy of upgrading less protected infrastructure. This aligns with Toronto's broader policy goal of enhancing cyclist safety through infrastructure improvements [@toronto_council_agenda]. Further categorization into bikeway types allow us to examine whether certain infrastructure types yield different impacts on ridership patterns. @fig-treatment-type-total demonstrates a nearly even split in treatment approaches, with 98 new installations and 88 upgrades among the 186 treated bikeways. This balanced distribution enables us to examine whether newly-installed or upgraded bikeways generates different effects on ridership, allowing us to suggest targeted policy implications.
 
-@fig-treatment-type-total demonstrates a nearly even split in treatment approaches, with 98 new installations and 88 upgrades among the 186 treated bikeways. This balanced distribution enables us to examine whether infrastructure expansion (new installations) versus enhancement (upgrades) generates different effects on ridership patterns. Further categorization into bikeway types, and sub-treatment groups allow us to examine whether certain types of infrastructures and types of changes yield different impacts on ridership patterns.
-
-@tbl-summary-statistics in the Appendix provides detailed quantitative breakdowns of both our outcome variables (showing pre/post/treatment period ridership counts and adjusted means) and treatment variables (showing the distribution of protected lanes, on-road lanes, and shared roadways across treatment and control groups).
+@tbl-summary-statistics in the Appendix provides detailed quantitative breakdowns of both our outcome variables (showing pre/post/treatment period ridership counts and adjusted means) and treatment variables (showing the distribution of protected lanes, on-road lanes, and shared roadways), across treatment and control groups.
 
 ```{r}
 #| label: fig-infra-type
@@ -312,7 +316,7 @@ These specifications allow us to identify which types of infrastructure improvem
 
 # Results {#sec-results}
 ## Parallel Trends Analysis
-A key assumption of our difference-in-differences design is that treated and control bikeways would have followed parallel trends in the absence of treatment. @fig-parallel visualizes this assumption by plotting the seasonally adjusted monthly rides for both treated and control bikeways during the pre-treatment period. While the treatment group consistently shows higher monthly average ridership levels than the control group, the trends between the two groups appear to move in parallel before treatment, particularly in the period from month -20 to month -10. We exclude the six months immediately preceding treatment from this visual analysis due to possible overlap in construction, avoiding potential anticipation effects.
+A key assumption of our difference-in-differences design is that treated and control bikeways would have followed parallel trends in the absence of treatment. @fig-parallel visualizes this assumption by plotting the seasonally adjusted monthly rides for both treated and control bikeways during the pre-treatment period. While the treatment group consistently shows higher monthly average ridership levels than the control group, the trends between the two groups appear to move in parallel before treatment, particularly in the period from month -20 to month -10.
 
 ```{r}
 #| label: fig-parallel
@@ -326,8 +330,11 @@ parallel_plot <- analysis_data %>%
 
 ggplot(parallel_plot, 
        aes(x = relative_month, 
-           y = monthly_rides_adj, color = treatment)) +
+           y = monthly_rides_adj, 
+           color = treatment)) +
   stat_summary(geom = "line", fun = mean, size = 1) +
+  geom_smooth(method = "lm", se = FALSE, size = 0.5, alpha = 0.5,
+              linetype = "dashed") +
   labs(
     x = "Relative Months (Pre-Treatment)",
     y = "Seasonally Adjusted Monthly Rides",
@@ -336,9 +343,11 @@ ggplot(parallel_plot,
   scale_color_manual(values = c("TRUE" = "#ff7f0e", "FALSE" = "#1f77b4"),
                      labels = c("Control", "Treated")) +
   theme_minimal() +
-  theme(legend.position = "top",
-        panel.grid.major = element_line(color = "gray85", linewidth = 0.35)
-        )
+  theme(
+    legend.position = "top",
+    panel.grid.major = element_line(color = "gray85", linewidth = 0.35)
+  )
+
 
 ```
 
@@ -346,9 +355,9 @@ The full results of the parallel trends test are provided in @tbl-parallel in th
 
 
 ## Difference-in-Differences Model Estimates
-@tbl-main-results presents the results from our main difference-in-differences model. The model estimates that infrastructure improvements led to a significant increase in Bike Share ridership. During the treatment year, we observe a marginally significant increase of 32.4 rides per month (p < 0.10). The effect becomes substantially larger in the post-treatment period, with an estimated increase of 133.1 rides per month (p < 0.01), compared to the pre-treatment period.
+@tbl-main-results presents the results from our main difference-in-differences model. The model estimates that infrastructure improvements led to a significant increase in Bike Share ridership. During the treatment year, we observe a marginal increase of 32.4 rides per month (p < 0.1). The effect becomes substantially larger in the post-treatment period, with an estimated increase of 133.1 rides per month (p < 0.01), compared to the pre-treatment period.
 
-The high R-squared value of 0.785 indicates that our model explains a substantial portion of the variation in ridership. The inclusion of bikeway and time fixed effects helps control for unobserved confounders that might affect ridership patterns.
+The high R-squared adjusted value of 0.781 indicates that our model explains a substantial portion of the variation in ridership. The inclusion of bikeway and time fixed effects helps control for unobserved confounders that might affect ridership patterns.
 
 ```{r}
 #| label: tbl-main-results
@@ -362,11 +371,11 @@ main_did <- readRDS(here::here("models/main_did.rds"))
 modelsummary(
   list("Main DiD Estimates" = main_did),
   statistic = "s.e. = {std.error}, p = {p.value}",
-  gof_map = c("nobs", "r.squared", "adj.r.squared"),
+  gof_map = c("r.squared", "adj.r.squared"),
   coef_map = c(
     "period::post:treatment" = "Post-Treatment Effect",
     "period::treatment:treatment" = "During-Treatment Effect"
-  ),
+  )
 )
 ```
 
@@ -401,17 +410,17 @@ placebo_random <- analysis_data %>%
 modelsummary(
   list("Placebo Test Estimates" = placebo_random_did),
   statistic = "s.e. = {std.error}, p = {p.value}",
-  gof_map = c("nobs", "r.squared", "adj.r.squared"),
+  gof_map = c("r.squared", "adj.r.squared"),
   coef_map = c(
     "period::post:placebo_treatment" = "Post-Placebo Treatment Effect",
     "period::treatment:placebo_treatment" = "During-Placebo Treatment Effect"
-  ),
+  )
 )
 
 ```
 
 ### Heterogeneous Effects
-We examine treatment effect heterogeneity across different types of infrastructure and implementation strategies. @tbl-hetero-lane presents the results by bikeway type, with each coefficient representing the change in ridership compared to the pre-treatment period for that specific infrastructure type. Protected lanes show the most dramatic impact, generating an additional 381.9 rides per month post-treatment (p < 0.001) – more than twice the effect of on-road lanes (169.2 rides, p < 0.001) and more than triple the effect of shared roadways (111.7 rides, p < 0.001). The substantially larger effect of protected lanes suggests that perceived safety significantly influences riders' willingness to use Bike Share.
+We examine treatment effect heterogeneity across different types of bikeway and implementation strategies. @tbl-hetero-lane presents the results by bikeway type, with each coefficient representing the change in ridership compared to the pre-treatment period for that specific bikeway type. Protected lanes show the most impact, generating an additional 381.9 rides per month post-treatment, whereas on-road lanes and shared roadways generated an additional 169.2 and 111.7 additional monthly rides, respectively. The substantially larger effect of protected lanes suggests that perceived safety significantly influences riders' willingness to use Bike Share.
 
 ```{r}
 #| label: tbl-hetero-lane
@@ -425,7 +434,7 @@ did_hetero_lane <- readRDS(here::here("models/did_hetero_lane_type.rds"))
 modelsummary(
   list("Heterogenous Estimates by Bikeway Type" = did_hetero_lane),
   statistic = "s.e. = {std.error}, p = {p.value}",
-  gof_map = c("nobs", "r.squared", "adj.r.squared"),
+  gof_map = c("r.squared", "adj.r.squared"),
   coef_map = c(
   "period::treatment:treatment_infra::Control" = "During-Treatment Effect: Control Bikeways",
   "period::treatment:treatment_infra::Treated-Shared" = "During-Treatment Effect: Shared Roadways",
@@ -439,7 +448,7 @@ modelsummary(
 )
 ```
 
-@tbl-hetero-treat compares the effectiveness of upgrading existing infrastructure versus installing new bikeways. Upgrades to existing infrastructure generate larger and more immediate benefits, showing both a significant treatment-year effect (43.8 additional rides, p < 0.10) and a strong post-treatment effect (152.7 additional rides, p < 0.01). In contrast, newly-installed bikeways show no significant effect during the treatment year and a smaller post-treatment increase (115.5 rides, p < 0.10), suggesting that improvements to established cycling routes may be more effective at increasing ridership than creating entirely new routes.
+@tbl-hetero-treat compares the effectiveness of upgrading existing infrastructure against installing new bikeways. Our results show that upgrades to existing infrastructure generate larger and more immediate benefits, showing both a significant treatment-year effect of 43.8 additional monthly rides, and a strong post-treatment effect of 152.7 additional monthly rides. In contrast, newly-installed bikeways show no significant effect during the treatment year (p = 0.280) and a smaller post-treatment increase (115.5 rides, p < 0.10), suggesting that improvements to established cycling routes may be more effective at increasing ridership than creating entirely new routes.
 
 ```{r}
 #| label: tbl-hetero-treat
@@ -453,7 +462,7 @@ did_hetero_treat_type <- readRDS(here::here("models/did_hetero_treat_type.rds"))
 modelsummary(
   list("Heterogeneous Estimates by Implementation" = did_hetero_treat_type),
   statistic = "s.e. = {std.error}, p = {p.value}",
-  gof_map = c("nobs", "r.squared", "adj.r.squared"),
+  gof_map = c("r.squared", "adj.r.squared"),
   coef_map = c(
     "period::treatment:sub_treatment_type::Upgraded" = "During-Treatment Effect: Upgraded",
     "period::treatment:sub_treatment_type::Newly-Installed" = "During-Treatment Effect: Newly Installed",
@@ -469,24 +478,24 @@ These heterogeneity analyses shows important distinctions in the effectiveness o
 Our difference-in-differences analysis of Toronto's cycling infrastructure changes between 2019-2021 demonstrates how different types of cycling infrastructure improvements influence Bike Share utilization. The results demonstrate that while infrastructure investments broadly increase cycling adoption, the magnitude and timing of these effects vary substantially by implementation approach and infrastructure type.
 
 ## Key Empirical Findings and Their Implications
-The evolution of treatment effects over time tells an important story about behavior change and infrastructure adoption. During the treatment year, we observe a modest but marginally significant increase of 32.4 rides per month (p < 0.10). This relatively small initial effect likely reflects several factors. First, infrastructure improvements often cause temporary disruption during construction, potentially suppressing immediate usage of bike share in the surrounding areas. Second, the treatment year impacts may be diluted because we only observe the year of changes, not precise implementation dates. Most importantly, the minor initial increase suggests that behavioral adaptation to new infrastructure takes time as users adjust their travel patterns and routine to new routes.
+The evolution of treatment effects over time tells an important story about behavior change and infrastructure adoption. During the treatment year, we observe a modest increase of 32.4 rides per month, likely reflecting several factors. First, infrastructure improvements often cause temporary disruption during construction, potentially suppressing immediate usage of bike share in the surrounding areas. Second, the treatment year impacts may be diluted because we only observe the year of changes, not precise implementation dates. Most importantly, the minor initial increase suggests that behavioral adaptation to new infrastructure takes time as users adjust their travel patterns and routine to new routes.
 
-The significant increase in the post-treatment period – to 133.1 additional rides per month (p < 0.01) – shows the true potential of infrastructure improvements once fully integrated into the transportation network. This impact from pre-treatment to post-treatment periods aligns with research from the University of Colorado Denver showing that "building safe facilities for cyclists is one of the biggest factors in road safety for everyone" [@MARSHALL2019100539]. The magnitude of this change suggests that infrastructure improvements don't just make existing cyclists' trips safer, they also alter the decisions behind mode of transportation for many residents.
+The significant increase in the post-treatment period to 133.1 additional rides per month shows the true potential of infrastructure improvements once fully integrated into the transportation network. This impact from pre-treatment to post-treatment periods aligns with research from the University of Colorado Denver showing that "building safe facilities for cyclists is one of the biggest factors in road safety for everyone" [@MARSHALL2019100539]. The magnitude of this change suggests that infrastructure improvements don't just make existing cyclists' trips safer, they also alter the decisions behind mode of transportation for many residents.
 
-To put these effects in perspective, our treatment estimate of 133.1 additional monthly rides per bikeway translates to approximately 24,757 additional monthly rides across all 186 treated segments, or nearly 300,000 additional rides annually. This substantial increase is reflected in the raw data (see @tbl-summary-statistics in Appendix @sec-additional-figures) - treated segments averaged 331.92 monthly rides post-treatment compared to 209.03 pre-treatment, while control segments saw a more modest increase from 85.59 to 107.77 monthly rides over the same period. The magnitude of this effect is particularly notable given that treated segments represent only about 16% of Toronto's total bikeways (186 out of 1,191 total segments) but generated significant ridership gains, suggesting that targeted infrastructure improvements can have outsized impacts on system utilization.
+To put these effects in perspective, our treatment estimate of 133.1 additional monthly rides per bikeway translates to approximately 24,757 additional monthly rides across all 186 treated segments, or nearly 300,000 additional rides annually. Given that treated bikeways recorded about 1.48 million total rides in the two years following improvements, our estimates suggest that 40% of these rides can be linked directly to the new or upgraded infrastructure. This substantial increase is reflected in the raw data (see @tbl-summary-statistics in Appendix @sec-additional-figures), where treated segments averaged 331.92 monthly rides post-treatment compared to 209.03 pre-treatment, while control segments saw a more modest increase from 85.59 to 107.77 monthly rides over the same period. The magnitude of this effect is particularly notable given that treated segments represent only about 16% of total bikeways in our study (186 out of 1,191 total segments) but generated significant ridership gains, suggesting that targeted infrastructure improvements can have outsized impacts on system utilization.
 
 The dramatic difference in baseline ridership between treatment and control groups (209.03 versus 85.59 average monthly rides pre-treatment, as shown in @tbl-summary-statistics) also provides important context for interpreting our heterogeneous effects. This pattern suggests that the city prioritized improvements on already-popular routes, which may partially explain why upgrades to existing infrastructure showed more immediate effects than new installations. However, the fact that treated segments still demonstrated substantial gains in ridership despite starting from a higher baseline suggests that infrastructure improvements can drive meaningful increases in cycling activity even on already-established routes.
 
 This substantial increase in post-treatment ridership may also be partially driven by strategic expansion of the Bike Share network itself. Following infrastructure improvements, Bike Share Toronto can coordinate with the city to place new stations near cycling infrastructure. This complementary expansion of both infrastructure and Bike Share access could create a multiplier effect, where improved infrastructure attracts more stations, which in turn enables more riders to access the enhanced bike lanes. While this interaction between infrastructure and system expansion complicates our causal interpretation, it reflects the real-world synergy between cycling infrastructure and bike share system development.
 
 ### Heterogenous Effect Findings
-Our heterogeneous effects analysis show which interventions most effectively promote cycling. Protected lanes show remarkably strong effects, generating 381.9 additional monthly rides post-treatment (p < 0.001) – more than twice the impact of on-road lanes (169.2 rides, p < 0.001) and more than triple the effect of shared roadways (111.7 rides, p < 0.001). This substantial difference in effectiveness likely stems from:
+Our heterogeneous effects analysis show which interventions most effectively promote cycling. Protected lanes show remarkably strong effects, generating 381.9 additional monthly rides post-treatment, more than twice the impact of on-road lanes, and more than triple the effect of shared roadways. This substantial difference in effectiveness likely stems from:
 
 - **Safety perceptions**: The physical separation from traffic provided by protected lanes addresses the concerns of what @nacto2016 research identifies as the "interested but concerned" majority of potential cyclists.
 - **User confidence**: Protected infrastructure may encourage less experienced cyclists to try Bike Share, expanding the user base beyond confident urban cyclists.
-- **Urban density patterns**: Protected lanes are more commonly implemented in denser, high-traffic areas like downtown Toronto, where higher population density and concentration of destinations naturally generate more cycling trips. This geographic distribution may partially explain their stronger treatment effects compared to other infrastructure types.
+- **Urban density patterns**: Protected lanes are more commonly implemented in denser high-traffic areas like downtown Toronto, where higher population density and concentration of destinations naturally generate more cycling trips. This geographic distribution may partially explain their stronger treatment effects compared to other infrastructure types.
 
-The comparison between upgrades and new installations provides equally important discoveries for implementation strategy. Upgrades to existing infrastructure generate more monthly ridership (152.7 adjusted rides), compared to newly-installing bike lanes (115.5 adjusted rides) post-treatment. Additionally, during the treatment period, upgrades to existing infrastructure show immediate effect to ridership (43.8 rides, p < 0.10), whereas new installations show no significant treatment-year effect. This pattern suggests that improving existing cycling routes may be more effective than expanding into new areas, particularly for short-term ridership gains. This finding aligns with Toronto's strategic focus during the same period as our study, on upgrading existing infrastructure to "higher-order" facilities, as outlined in the 2019-2021 Cycling Network Plan Update [@toronto_council_agenda].
+The comparison between upgrades and new installations provides equally important discoveries for implementation strategy. Upgrades to existing infrastructure generate more monthly ridership (152.7 rides), compared to newly-installed bikeways (115.5 rides) post-treatment. Additionally, during the treatment period, upgrades to existing infrastructure show immediate effect to ridership, whereas new installations show no significant treatment-year effect. This pattern suggests that improving existing cycling routes may be more effective than expanding into new areas, particularly for short-term ridership gains. This finding aligns with Toronto's strategic focus during the same period as our study, on upgrading existing infrastructure to "higher-order" facilities, as outlined in the 2019-2021 Cycling Network Plan Update [@toronto_council_agenda].
 
 ## Infrastucture Development and Policy Implications
 Our findings have substantial implications for cycling infrastructure development strategies. The strong performance of protected lanes, combined with the effectiveness of upgrades, suggests a coupled approach:
@@ -502,7 +511,7 @@ The timing of effects also has important implications for policy evaluation. The
 Our difference-in-differences design, supported by robust parallel trends in the pre-treatment period and null results in placebo tests, provides strong causal evidence for the effectiveness of cycling infrastructure. The robustness of our results is particularly noteworthy given Toronto's challenging research context, where multiple infrastructure projects and transportation initiatives often overlap temporally and spatially. However, several limitations merit discussion:
 
 - **Temporal precision**: Our inability to observe exact implementation dates within treatment years likely diminishes treatment-year effects and may understate immediate post-implementation impacts.
-- **Spatial relationships**: While we control for station proximity to bikeways, we cannot observe actual route choices. This may lead us to underestimate infrastructure usage if riders access lanes from more distant starting points, or even overestimate usage if riders don't use bike lanes, despite starting near one. This limitation is particularly significant in downtown areas where the density of both bike lanes and stations makes it difficult to isolate specific infrastructure effects.
+- **Spatial relationships**: While we control for station proximity to bikeways, we cannot observe actual route choices. This may lead us to underestimate infrastructure usage if riders access bikeways from more distant starting points, or even overestimate usage if riders don't use bikeways, despite starting near one. This limitation is particularly significant in downtown areas where the density of both bikeways and stations makes it difficult to isolate specific infrastructure effects.
 - **Station placement effects**: Our results may partially reflect strategic placement of new Bike Share stations near improved infrastructure rather than purely infrastructure-driven changes in behavior. While this interaction makes it harder to isolate the direct effect of infrastructure improvements, it captures the realistic policy dynamic where bike share systems expand in tandem with cycling infrastructure.
 
 ## Future Research Directions
@@ -510,7 +519,7 @@ Several promising avenues for future research emerge from these findings:
 
 - **User surveys**: Qualitative research could help explain the mechanisms behind the stronger effects of protected lanes and how infrastructure influences mode choice decisions. Such research could particularly focus on understanding the "interested but concerned" demographic identified by @nacto2016 as vital for expanding cycling adoption.
 - **Network effects**: Future studies could examine how the benefits of infrastructure improvements spill over onto connecting routes and affect system-wide ridership patterns. This could help inform Toronto's goal of creating a more connected cycling network, as outlined in the city's 2025-2027 implementation program [@cyclingNetworkPlan].
-- **Neighborhood-level analysis**: Future research could examine how infrastructure effects vary across Toronto's diverse neighborhoods. Such analysis would be particularly beneficial as Toronto expands Bike Share into new areas, helping identify where different types of infrastructure improvements might have the greatest impact. This geographic heterogeneity analysis could also inform equity considerations in infrastructure deployment, ensuring benefits are distributed across the city's diverse communities.
+- **Neighborhood-level analysis**: Future research could examine how infrastructure effects vary across Toronto's diverse neighborhoods. Such analysis would address our studies selection bias and be particularly beneficial as Toronto expands Bike Share into new areas, helping identify where different types of infrastructure improvements might have the greatest impact. This geographic heterogeneity analysis could also inform equity considerations in infrastructure deployment, ensuring benefits are distributed across the city's diverse communities.
 - **Integration with public transit**: Studies could investigate how cycling infrastructure near transit hubs affects multi-modal trip patterns, particularly relevant given Toronto's efforts to integrate Bike Share with the TTC system [@ttcIntegration].
 
 This research contributes to our understanding of how cycling infrastructure influences urban mobility patterns. The clear relationship between infrastructure quality and ridership, particularly the strong effect of protected lanes, provides evidence-based guidance for cities working to encourage sustainable transportation. As Toronto continues expanding its cycling network, these findings can help inform investment priorities and implementation strategies to maximize the impact of infrastructure improvements.
@@ -534,7 +543,7 @@ Having this idealized survey would help us directly answer our research question
 
 ## Implementation Strategy
 ### Sample Size and Target Audience
-Our survey will be targeted towards: current and former (In-active user for over 6 months) Bike Share members, and non-bike share users living within 200 meters of Bike Share Station. Our target sample size will be 3,000 respondents:
+Our survey will be targeted towards: current and former (In-active user for over 6 months) Bike Share members, and non-bike share users living within 200 meters of Toronto Bike Share Stations. To ensure our surveys statistical reliability and stays within our budget, it will aim to target 3,000 respondents:
 
 - 1,000 treatment area residents
 - 1,000 control area residents
@@ -546,7 +555,7 @@ Our survey will be targeted towards: current and former (In-active user for over
 - **Incentive Structure**: \$20 Bike Share gift card for completed surveys, with a bonus \$10 for follow-up survey completion
 
 ### Budget Allocation
-Our allocation of a \$100,000 budget, will be:
+With an allocation of a \$100,000 budget, and to ensure we reach our target sample size, we will distribute our budget as follows:
 
 - $15,000 to digital targeting costs of placing ads on social media platforms.
 - $10,000 to Bike Share Toronto to distribute Emails and SMS notifications, taking advantage of their existing digital platform and data.
@@ -787,7 +796,7 @@ ggplot(bikeWay_type_summary, aes(x = as.factor(UPGRADED), y = count, fill = INFR
 
 # Prepare pre-treatment data for parallel trends test
 pre_treatment_data <- analysis_data %>%
-  filter(period == "pre" & relative_month < -5) %>%
+  filter(period == "pre" & relative_month < -6) %>%
   mutate(relative_month_treatment_interaction = interaction(
     relative_month, treatment, drop = TRUE
   ))
@@ -795,12 +804,31 @@ pre_treatment_data <- analysis_data %>%
 parallel_trends_test <- readRDS(here::here("models/parallel_trends_test.rds"))
 
 modelsummary(
-  list("Coefficient (std.error)" = parallel_trends_test),
-  stars = TRUE,
-  gof_map = c("nobs", "r.squared", "adj.r.squared"),
+  list("Estimates" = parallel_trends_test),
   data = pre_treatment_data,
-  estimate = "{estimate}{stars} ({std.error})", 
-  statistic = NULL
+  estimate = "{estimate} (p = {p.value})",
+  statistic = NULL,
+  gof_map = c("r.squared", "adj.r.squared"),
+  coef_map = c(
+    "relative_month::-24:treatment" = "-24 Months to Treatment",
+    "relative_month::-23:treatment" = "-23 Months to Treatment",
+    "relative_month::-22:treatment" = "-22 Months to Treatment",
+    "relative_month::-21:treatment" = "-21 Months to Treatment",
+    "relative_month::-20:treatment" = "-20 Months to Treatment",
+    "relative_month::-19:treatment" = "-19 Months to Treatment",
+    "relative_month::-18:treatment" = "-18 Months to Treatment",
+    "relative_month::-17:treatment" = "-17 Months to Treatment",
+    "relative_month::-16:treatment" = "-16 Months to Treatment",
+    "relative_month::-15:treatment" = "-15 Months to Treatment",
+    "relative_month::-14:treatment" = "-14 Months to Treatment",
+    "relative_month::-13:treatment" = "-13 Months to Treatment",
+    "relative_month::-12:treatment" = "-12 Months to Treatment",
+    "relative_month::-11:treatment" = "-11 Months to Treatment",
+    "relative_month::-10:treatment" = "-10 Months to Treatment",
+    "relative_month::-9:treatment" = "-9 Months to Treatment",
+    "relative_month::-8:treatment" = "-8 Months to Treatment",
+    "relative_month::-7:treatment" = "-7 Months to Treatment"
+  )
 )
 ```
  
