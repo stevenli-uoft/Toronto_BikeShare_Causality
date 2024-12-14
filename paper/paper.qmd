@@ -6,7 +6,7 @@ author:
 thanks: "Code and data are available at: [https://github.com/stevenli-uoft/Toronto_BikeShare_Causality](https://github.com/stevenli-uoft/Toronto_BikeShare_Causality)."
 date: today
 date-format: long
-abstract: "We investigate the causal effects of cycling infrastructure improvements on Bike Share ridership in Toronto between 2017 and 2023. Using a difference-in-differences design with over 7.4 million rides across 1,191 bikeways, we find that treated segments experience an additional 133.1 monthly ride per bikeway, translating to nearly 300,000 additional rides annually, or 40% of all rides on treated bikeways post-improvement. Protected lanes generate the largest gains, more than tripling usage compared to shared roadways, while upgrades to existing bikeways outpace the benefits of new installations.Our findings suggest that strategic implementation of protected infrastructure can substantially increase cycling activity, with implications for Toronto's planned addition of 100 kilometers of cycling infrastructure between 2025-2027. These results provide evidence-based guidance for cities working to encourage sustainable transportation through cycling infrastructure development."
+abstract: "We investigate the causal effects of cycling infrastructure improvements on Bike Share ridership in Toronto between 2017 and 2023. Using a difference-in-differences design with over 7.4 million rides across 1,191 bikeways, we find that treated segments experience an additional 133.1 monthly ride per bikeway, translating to nearly 300,000 additional rides annually, or 40% of all rides on treated bikeways post-improvement. Protected lanes generate the largest gains, more than tripling usage compared to shared roadways, while upgrades to existing bikeways outpace the benefits of new installations. Our findings suggest that strategic implementation of protected infrastructure can substantially increase cycling activity, with implications for Toronto's planned addition of 100 kilometers of cycling infrastructure between 2025-2027. These results provide evidence-based guidance for cities working to encourage sustainable transportation through cycling infrastructure development."
 format:
   pdf:
     toc: true
@@ -532,7 +532,7 @@ This research contributes to our understanding of how cycling infrastructure inf
 # Appendix {-}
 # Idealized Survey Methodology {#sec-ideal-survey}
 ## Survey Objectives
-Following Stantcheva's [-@Stantcheva2023] framework, we recognize that surveys are not merely for data colletion, but rather "creating the process that will generate the data." The goal of our idealized survey is to measure otherwise "invisible factors" regarding cycling infrastructures influence on bike share usage, specifically:
+Following Stantcheva's [-@Stantcheva2023] framework, we recognize that surveys are not merely for data collection, but rather "creating the process that will generate the data." The goal of our idealized survey is to measure otherwise "invisible factors" regarding cycling infrastructures influence on bike share usage, specifically:
 
   > - Causal relationship between infrastructure changes and ridership
   > - Mental processes behind route selection with/without bike lanes
